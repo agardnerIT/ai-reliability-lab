@@ -1,6 +1,6 @@
 # Repository Template
 
-This template is the starting point for new repositories in the `dynatrace-oss` organization.
+This template is the starting point for new repositories in the `dynatrace-oss` organization. X
 
 Creating a repository in `dynatrace-oss` establishes an ongoing ownership, maintenance, and lifecycle commitment. Before a repository is published or actively used, the owning team must confirm that the repository has clear ownership, appropriate documentation, and the minimum required governance and automation in place.
 
