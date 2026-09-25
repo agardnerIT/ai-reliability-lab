@@ -1,0 +1,30 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspace:cached
+    command: sleep infinity
+    environment:
+      - AWS_REGION=us-east-2
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.161.0
+    container_name: dt-otel-collector
+    # Shares the app container's network namespace, so the collector
+    # is reachable at localhost:4318 from inside the app container,
+    # exactly like the "docker run" instructions in the docs.
+    network_mode: service:app
+    volumes:
+      - ../collector.config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    env_file:
+      # Copy .env.example to .env and fill in your Dynatrace token to use this.
+      # Not required for the collector to start: it just sends to the debug
+      # (console) exporter only until DT_TENANT/DT_API_TOKEN are set and the
+      # container is restarted with `docker restart dt-otel-collector`.
+      - path: .env
+        required: false
+    depends_on:
+      - app
