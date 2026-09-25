@@ -1,0 +1,21 @@
+{
+  "name": "AI Observability with Dynatrace",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "forwardPorts": [4318],
+  "portsAttributes": {
+    "4318": {
+      "label": "OTel Collector (OTLP/HTTP)"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/install-requirements.sh",
+  "mounts": [
+    "source=${localEnv:HOME}/.aws,target=/root/.aws,type=bind,consistency=cached"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-python.python"]
+    }
+  }
+}
