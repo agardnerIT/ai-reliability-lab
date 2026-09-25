@@ -2,27 +2,7 @@
 
 ## Purpose
 
-This repository is a template for creating new repositories in the `dynatrace-oss` organization.
-
-Agents working in this repository should optimize for:
-- clear ownership
-- durable repository standards
-- minimal but useful baseline automation
-- documentation that is easy for maintainers to update after repository creation
-
-## What this repository is
-
-This repository is not an end-user project. It is a baseline template for maintainers creating new repositories.
-
-The root `README.md` should be treated as a maintainer setup guide. Changes should make the template easier to adopt, easier to review, and less likely to produce incomplete or unclear repositories.
-
-## Repository expectations
-
-- Keep changes simple, explicit, and easy for maintainers to understand.
-- Prefer small, reviewable pull requests.
-- Preserve required governance files unless the task is explicitly to change the template standard.
-- Use placeholder content only where maintainers are expected to replace it after creating a new repository from this template.
-- Make ownership, support, and publication expectations explicit.
+This repository is a hands-on exercise and doc stack for the AI Observability Lab.
 
 ## Required baseline files
 
@@ -41,7 +21,7 @@ Unless the task explicitly says otherwise, preserve or improve these files:
 
 ## Documentation guidance
 
-- Treat the root `README.md` as a maintainer setup guide for the template.
+- Treat the markdown files in the `docs` folder as the documentation of this project.
 - Prefer concrete, action-oriented instructions.
 - Prefer policy-style wording where expectations are mandatory.
 - Keep support and ownership language explicit.
