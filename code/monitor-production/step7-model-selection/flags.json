@@ -1,0 +1,20 @@
+{
+  "$schema": "https://flagd.dev/schema/v0/flags.json",
+  "flags": {
+    "active-model": {
+      "state": "ENABLED",
+      "variants": {
+        "control":    "openai.gpt-oss-120b",
+        "challenger": "openai.gpt-oss-20b"
+      },
+      "defaultVariant": "control",
+      "targeting": {
+        "if": [
+          {"<=": [{"var": "urgency"}, 2]},
+          {"fractional": [["control", 90], ["challenger", 10]]},
+          "control"
+        ]
+      }
+    }
+  }
+}

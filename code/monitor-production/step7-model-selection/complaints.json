@@ -1,0 +1,22 @@
+[
+  {
+    "id": "C001",
+    "customer": "Alice",
+    "message": "My order arrived smashed. This is the SECOND time this has happened. I want a full refund right now or I am disputing with my bank and leaving reviews everywhere."
+  },
+  {
+    "id": "C002",
+    "customer": "Bob",
+    "message": "Delivery was a day late but the product itself is fine. Would just be good to get earlier updates next time."
+  },
+  {
+    "id": "C003",
+    "customer": "Carol",
+    "message": "You sent me the wrong colour. I ordered blue and got red. Can you send the correct one and arrange collection of this one?"
+  },
+  {
+    "id": "C004",
+    "customer": "Dave",
+    "message": "I have been waiting three weeks for a response to my previous complaint. Nobody has called me back. I am contacting my solicitor if I do not hear back today."
+  }
+]
