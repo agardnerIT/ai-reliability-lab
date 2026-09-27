@@ -43,8 +43,6 @@ This changes the instrumentation pattern in three important ways.
 ```bash
 cd code/monitor-production/step5-streaming
 
-pip install -r requirements.txt
-
 export AWS_REGION=us-east-2
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 

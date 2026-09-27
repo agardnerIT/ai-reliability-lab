@@ -172,8 +172,6 @@ The `matcher` field is a regex matched against the tool name. `.*` matches all t
 ```bash
 cd ai-aws-bedrock-1
 
-pip install -r dev-03-claude-code-hook/requirements.txt
-
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 ```
 

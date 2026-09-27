@@ -69,8 +69,6 @@ Our pipeline processes customer complaints:
 ```bash
 cd code/monitor-production/step3-agentic-pipeline
 
-pip install -r requirements.txt
-
 export AWS_REGION=us-east-2
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 

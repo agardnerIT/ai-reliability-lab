@@ -1,0 +1,11 @@
+openai
+aws-bedrock-token-generator
+chromadb
+fastapi
+flask==3.1.1
+httpx
+openfeature-sdk
+opentelemetry-api
+opentelemetry-exporter-otlp-proto-http
+opentelemetry-sdk
+uvicorn

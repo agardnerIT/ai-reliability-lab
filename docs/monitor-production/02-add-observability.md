@@ -1,4 +1,4 @@
-# Step 2: Adding Observability
+# Step 2: Adding ObservabilityX
 
 <div class="dt-trail">
   <div class="dt-trail-item">
@@ -39,7 +39,7 @@ We take the single-call app from Step 1 and add OpenTelemetry instrumentation so
 ## What we're adding
 
 - A **trace** with a **span** wrapping the AI call
-- Standard **GenAI attributes** on the span (model, token counts, finish reason)
+- Standard **[GenAI attributes](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/README.md)** on the span (model, token counts, finish reason)
 - A **token usage metric** that aggregates across all calls
 
 ???+ question "Why not just use logs?"
@@ -53,16 +53,24 @@ We take the single-call app from Step 1 and add OpenTelemetry instrumentation so
 
 ## Before you start
 
-Make sure the OpenTelemetry collector is running. If you haven't started it yet, open a new terminal. Then customise the following variables and run:
+Make sure the OpenTelemetry collector is running (`docker ps` from your host machine **not** the devcontainer) and that your Dynatrace credentials are set.
+
+**Codespaces or local dev container (Options 1 and 2)**
+
+The collector starts automatically alongside your environment. You don't need to run anything.
+
+To point it at your Dynatrace tenant, follow the [Adding your Dynatrace token](../foundation/environment-setup.md#adding-your-dynatrace-token) steps in Environment Setup if you haven't already.
+
+**Plain Python, no containers (Option 3)**
+
+Open a new terminal, set your credentials, and start the collector manually:
 
 ```bash
 export DT_TENANT=abc12345
 export DT_API_TOKEN=dt0c01.*****.*******
-```
 
-Then start the collector:
+touch file.log
 
-```bash
 docker run --rm \
   -p 4318:4318 \
   -e DT_TENANT \
@@ -78,8 +86,6 @@ Leave that terminal open. The collector needs to be running while you work throu
 
 ```bash
 cd code/monitor-production/step1and2-basic-app
-
-pip install -r requirements.txt
 
 export AWS_REGION=us-east-2
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
@@ -271,13 +277,33 @@ We record input and output tokens separately (two calls to `record`) so you can 
 
 ## What you'll see in Dynatrace
 
-After running, open Dynatrace and navigate to **Distributed Traces**. You should see a trace from `bedrock-chat-client` with:
+After running, wait about **60 seconds** for data to arrive, then query from the terminal.
 
-- A single span named `chat openai.gpt-oss-120b`
-- Duration showing the actual time the AI call took
-- Attributes including token counts, model name, and the input/output messages
+### Check the trace
 
-In **Metrics**, you'll find `gen_ai.client.token.usage` with dimensions for model, provider, and token type.
+```bash
+dtctl query 'fetch spans
+| filter service.name == "bedrock-chat-client"
+| fields timestamp, span.name, duration, gen_ai.request.model, gen_ai.usage.input_tokens, gen_ai.usage.output_tokens
+| sort timestamp desc
+| limit 5'
+```
+
+You should see a row with `span.name = chat openai.gpt-oss-120b`, the actual duration of the AI call, and your token counts.
+
+### Check the metric
+
+```bash
+dtctl query 'timeseries tokens = sum(gen_ai.client.token.usage), by: {gen_ai.token.type, gen_ai.request.model}
+| filter gen_ai.request.model == "openai.gpt-oss-120b"
+| fieldsAdd total = arraySum(tokens)
+| fields gen_ai.request.model, gen_ai.token.type, total'
+```
+
+You should see two rows with a plain token count — one for `input` and one for `output`.
+
+???+ info "Why arraySum?"
+    `timeseries` returns one value per time bucket across the full lookback window (default ~2 hours), so the `tokens` column is an array. `arraySum()` collapses that array into a single total.
 
 ## What we're still missing
 

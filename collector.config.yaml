@@ -1,0 +1,34 @@
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+  filelog:
+    include: [/etc/file.log]
+    start_at: beginning
+    
+
+processors:
+  cumulative_to_delta:
+
+exporters:
+  debug:
+    verbosity: detailed
+
+  otlp_http/dynatrace:
+    endpoint: https://${DT_TENANT}.live.dynatrace.com/api/v2/otlp
+    headers:
+      Authorization: "Api-Token ${DT_API_TOKEN}"
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [debug, otlp_http/dynatrace]
+    metrics:
+      receivers: [otlp]
+      processors: [cumulative_to_delta]
+      exporters: [debug, otlp_http/dynatrace]
+    logs:
+      receivers: [filelog]
+      exporters: [debug, otlp_http/dynatrace]

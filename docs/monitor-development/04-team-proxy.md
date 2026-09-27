@@ -58,8 +58,6 @@ The `api_key` value is ignored by the proxy (authentication is handled separatel
 ```bash
 cd ai-aws-bedrock-1
 
-pip install -r dev-04-team-proxy/requirements.txt
-
 export AWS_REGION=us-east-2
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 

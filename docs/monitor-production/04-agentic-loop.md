@@ -49,8 +49,6 @@ The model looks at the complaint, looks at the available tools, and chooses what
 ```bash
 cd code/monitor-production/step4-agentic-loop
 
-pip install -r requirements.txt
-
 export AWS_REGION=us-east-2
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 

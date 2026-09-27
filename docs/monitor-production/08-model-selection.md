@@ -58,8 +58,6 @@ At each phase, Dynatrace gives you the comparison. You are not guessing: you hav
 ```bash
 cd code/monitor-production/step7-model-selection
 
-pip install -r requirements.txt
-
 export AWS_REGION=us-east-2
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 

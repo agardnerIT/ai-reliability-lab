@@ -115,8 +115,6 @@ Two legitimate questions go through. Two prompt-injection attempts are blocked b
 ```bash
 cd ai-aws-bedrock-1
 
-pip install -r code/monitor-development/step6-guardrails/requirements.txt
-
 export AWS_REGION=us-east-2
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 

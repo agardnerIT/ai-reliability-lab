@@ -36,12 +36,14 @@
 
 We start with the most basic thing possible: a single question to an AI model.
 
+## Before you start
+
+Make sure your AWS credentials are configured. See [Environment Setup](../foundation/environment-setup.md) if you haven't done this yet.
+
 ## Running it
 
 ```bash
 cd code/monitor-production/step1and2-basic-app
-
-pip install -r requirements.txt
 
 export AWS_REGION=us-east-2
 

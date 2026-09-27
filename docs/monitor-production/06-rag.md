@@ -43,8 +43,6 @@ This adds a new operation to the trace: the retrieval step.
 ```bash
 cd code/monitor-production/step6-rag
 
-pip install -r requirements.txt
-
 export AWS_REGION=us-east-2
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 

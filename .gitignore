@@ -1,8 +1,7 @@
-# Created by venv; see https://docs.python.org/3/library/venv.html
-*
-
-# Explicit even though the blanket rule above already covers it:
-# this holds the live Dynatrace API token during class and must never be committed.
-# Exclamation means re-include this file ONLY.
-!.devcontainer/.env.example
-.devcontainer/.env
+.env
+.devcontainer/devcontainer-lock.json
+bin
+lib
+include
+pyvenv.cfg
+*.DS_Store*

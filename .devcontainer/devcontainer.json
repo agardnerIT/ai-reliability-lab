@@ -10,9 +10,6 @@
     }
   },
   "postCreateCommand": "pip install --no-cache-dir -r requirements.txt",
-  "features": {
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
-  },
   "mounts": [
     "source=${localEnv:HOME}/.aws,target=/root/.aws,type=bind,consistency=cached"
   ],

@@ -41,7 +41,7 @@ Options 1 and 2 both use the same setup, so this step is identical either way. I
 
 1. In the integrated terminal, copy the template: `cp .devcontainer/.env.example .devcontainer/.env`
 2. Open `.devcontainer/.env` and fill in `DT_TENANT` and `DT_API_TOKEN` with the values from the walkthrough.
-3. Apply the change by restarting the collector container: `docker restart dt-otel-collector`
+3. Apply the change by recreating the collector container: `docker compose -f .devcontainer/docker-compose.yml up -d otel-collector`
 
 `.devcontainer/.env` is gitignored, so this never gets committed. Until you complete this step, the collector still runs, it just has nowhere to send data yet.
 
