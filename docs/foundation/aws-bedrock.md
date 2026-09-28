@@ -35,24 +35,17 @@ The `provide_token()` function handles AWS authentication (SigV4 signing) behind
 
 Our tutorials use `openai.gpt-oss-120b`, a large language model available via Bedrock Mantle. The `openai.` prefix is part of the model identifier in the Mantle namespace.
 
-## Prerequisites
-
-To run the tutorial code yourself, you'll need:
-
-1. An AWS account with Bedrock access enabled
-2. AWS credentials configured locally (`aws configure` or environment variables)
-3. The `aws_bedrock_token_generator` package installed
-4. The `AWS_REGION` environment variable set (e.g. `us-east-2`)
-
-???+ tip "Don't have Bedrock access?"
-    The tutorials are written so you can follow along and understand the concepts even without running the code. The observability instrumentation works the same way regardless of which AI provider you use.
-
 ## Why Bedrock?
 
 We use Bedrock for a few reasons:
+
 - It's enterprise-grade and production-ready
 - AWS handles model updates and availability
 - It supports the OpenAI-compatible API, which keeps our code portable
 - Many organisations already have AWS infrastructure in place
 
 The observability patterns in these tutorials work equally well with other providers (Anthropic's API directly, Azure OpenAI, etc.). Only the client setup differs.
+
+## Ready to run the code?
+
+See [Setup](setup.md) for how to configure your AWS credentials, Dynatrace tokens, and Python environment.

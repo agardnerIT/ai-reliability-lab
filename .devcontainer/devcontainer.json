@@ -9,7 +9,7 @@
       "label": "OTel Collector (OTLP/HTTP)"
     }
   },
-  "postCreateCommand": "pip install --no-cache-dir -r requirements.txt",
+  "postCreateCommand": "python .devcontainer/postCreate.py",
   "mounts": [
     "source=${localEnv:HOME}/.aws,target=/root/.aws,type=bind,consistency=cached"
   ],

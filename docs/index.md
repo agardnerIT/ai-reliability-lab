@@ -13,10 +13,11 @@ A few concepts come up constantly in these tutorials. Spending 15 minutes here w
 | [What's in a Request](foundation/anatomy-of-a-request.md) | Why sending one sentence can cost 1,000 tokens. System prompts, history, tools, and how they add up. |
 | [OpenTelemetry](foundation/opentelemetry.md) | The standard we use to collect data from AI apps. All our examples use it. |
 | [AWS Bedrock](foundation/aws-bedrock.md) | The AI platform used in these tutorials. |
-| [Dynatrace Setup](foundation/dynatrace-setup.md) | Create your API token and start the OTel Collector before running any code. |
+
+Then work through **[Setup](foundation/setup.md)** before running any code. The first thing it asks you to do is **fork this repository into your own GitHub account** — you don't have write access to the source, so you need your own copy before you can store secrets or use Codespaces. After that it walks you through credentials, environment options, and a smoke test.
 
 !!! tip "Already familiar with OTel and Bedrock?"
-    Skip straight to a path below. You can always come back here if something doesn't make sense.
+    Skip straight to [Setup](foundation/setup.md), then pick a path below.
 
 ---
 

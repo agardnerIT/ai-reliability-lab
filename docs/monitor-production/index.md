@@ -41,19 +41,25 @@ We chose this because it's realistic: most production AI apps involve more than 
   </div>
   <div class="dt-trail-item">
     <a href="06-rag/" class="dt-trail-step">Step 6: RAG</a>
+    <span class="dt-trail-arrow">→</span>
+  </div>
+  <div class="dt-trail-item">
+    <a href="07-guardrails/" class="dt-trail-step">Step 7: Guardrails</a>
+    <span class="dt-trail-arrow">→</span>
+  </div>
+  <div class="dt-trail-item">
+    <a href="08-model-selection/" class="dt-trail-step">Step 8: Model Migration</a>
   </div>
 </div>
 
 ## Before you start
 
-Make sure you've read through the [Foundation](../foundation/index.md) section and have:
+Complete [Foundation → Setup](../foundation/setup.md) before running any exercise. It walks you through:
 
-- [ ] A Dynatrace environment with a valid API token
-- [ ] The OTel Collector running on `localhost:4318`
-- [ ] Python 3.9+ installed
-- [ ] AWS credentials configured for Bedrock Mantle access
-
-See [Environment Setup](../foundation/environment-setup.md) for three ways to get all of this running, including a one-click GitHub Codespaces option that needs nothing installed locally.
+- [ ] AWS credentials (no AWS CLI required — environment variables work)
+- [ ] Dynatrace API token and platform token
+- [ ] Choosing your environment (Codespaces, dev container, or plain Python)
+- [ ] Verifying the OTel Collector is running on `localhost:4318`
 
 !!! tip "Just want to read along?"
     You don't need to run the code to learn. All the key concepts are explained in the text.

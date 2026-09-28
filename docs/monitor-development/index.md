@@ -38,12 +38,12 @@ These five steps show you how to get that visibility.
 
 ## Before you start
 
-Make sure you have:
+Complete [Foundation → Setup](../foundation/setup.md) before running any exercise. It walks you through:
 
-- [ ] A Dynatrace environment with a valid API token
-- [ ] The OTel Collector running on `localhost:4318`
-- [ ] Python 3.9+ installed
-- [ ] AWS credentials configured for Bedrock Mantle access
+- [ ] AWS credentials (no AWS CLI required — environment variables work)
+- [ ] Dynatrace API token and platform token
+- [ ] Choosing your environment (Codespaces, dev container, or plain Python)
+- [ ] Verifying the OTel Collector is running on `localhost:4318`
 
 !!! tip "Just want to read along?"
     You don't need to run the code to learn. All the key concepts are explained in the text.

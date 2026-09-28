@@ -1,4 +1,4 @@
-# Step 2: Adding ObservabilityX
+# Step 2: Adding Observability
 
 <div class="dt-trail">
   <div class="dt-trail-item">

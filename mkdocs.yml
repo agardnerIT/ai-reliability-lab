@@ -82,8 +82,7 @@ nav:
     - What's in a Request: foundation/anatomy-of-a-request.md
     - OpenTelemetry: foundation/opentelemetry.md
     - AWS Bedrock: foundation/aws-bedrock.md
-    - Dynatrace Setup: foundation/dynatrace-setup.md
-    - Environment Setup: foundation/environment-setup.md
+    - Setup: foundation/setup.md
   - Monitor Production AI:
     - monitor-production/index.md
     - "Step 1: Your First AI Call": monitor-production/01-single-call.md
