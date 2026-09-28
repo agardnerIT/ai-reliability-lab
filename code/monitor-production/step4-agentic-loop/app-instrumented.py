@@ -232,10 +232,10 @@ def _call_agent(agent_name: str, user_message: str) -> str:
     with tracer.start_as_current_span(f"invoke_agent {agent_name}") as agent_span:
         agent_span.set_attribute("gen_ai.operation.name", "invoke_agent")
         agent_span.set_attribute("gen_ai.agent.name",     agent_name)
-        agent_span.set_attribute("gen_ai.provider.name",  "openai")
+        agent_span.set_attribute("gen_ai.provider.name",  "aws.bedrock")
 
         with tracer.start_as_current_span(f"chat {MODEL}") as span:
-            span.set_attribute("gen_ai.provider.name",  "openai")
+            span.set_attribute("gen_ai.provider.name",  "aws.bedrock")
             span.set_attribute("gen_ai.operation.name", "chat")
             span.set_attribute("gen_ai.request.model",  MODEL)
             span.set_attribute("gen_ai.agent.name",     agent_name)
@@ -262,7 +262,7 @@ def _call_agent(agent_name: str, user_message: str) -> str:
                 # The same token counts go into the histogram metric with labels so
                 # you can filter/aggregate by agent, model, or token type in dashboards.
                 attrs = {
-                    "gen_ai.provider.name":  "openai",
+                    "gen_ai.provider.name":  "aws.bedrock",
                     "gen_ai.operation.name": "chat",
                     "gen_ai.request.model":  MODEL,
                     "gen_ai.response.model": response.model,
@@ -374,7 +374,7 @@ def triage(complaint: dict) -> None:
             # per-turn latency and token costs in the trace waterfall.
             # loop.turn lets you filter spans by iteration number.
             with tracer.start_as_current_span(f"chat {MODEL}") as span:
-                span.set_attribute("gen_ai.provider.name",  "openai")
+                span.set_attribute("gen_ai.provider.name",  "aws.bedrock")
                 span.set_attribute("gen_ai.operation.name", "chat")
                 span.set_attribute("gen_ai.request.model",  MODEL)
                 span.set_attribute("loop.turn",             turn)
@@ -397,7 +397,7 @@ def triage(complaint: dict) -> None:
                     # gen_ai.agent.name="orchestrator" distinguishes these metric
                     # points from sub-agent calls in the same histogram.
                     attrs = {
-                        "gen_ai.provider.name":  "openai",
+                        "gen_ai.provider.name":  "aws.bedrock",
                         "gen_ai.operation.name": "chat",
                         "gen_ai.request.model":  MODEL,
                         "gen_ai.response.model": response.model,

@@ -79,7 +79,7 @@ messages = [
 ]
 
 with tracer.start_as_current_span("chat code-review") as span:
-    span.set_attribute("gen_ai.provider.name",  "anthropic")
+    span.set_attribute("gen_ai.provider.name",  "aws.bedrock")
     span.set_attribute("gen_ai.operation.name", "chat")
     span.set_attribute("gen_ai.request.model",  MODEL)
     # Custom attribute to tag dev context — useful for filtering spans by task type
@@ -96,7 +96,7 @@ with tracer.start_as_current_span("chat code-review") as span:
         span.set_attribute("gen_ai.usage.output_tokens", response.usage.completion_tokens)
 
         common_attrs = {
-            "gen_ai.provider.name":  "anthropic",
+            "gen_ai.provider.name":  "aws.bedrock",
             "gen_ai.operation.name": "chat",
             "gen_ai.request.model":  MODEL,
             "gen_ai.response.model": response.model,

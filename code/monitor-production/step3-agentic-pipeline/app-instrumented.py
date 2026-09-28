@@ -83,10 +83,10 @@ def _call_agent(agent_name: str, user_message: str) -> str:
     with tracer.start_as_current_span(f"invoke_agent {agent_name}") as agent_span:
         agent_span.set_attribute("gen_ai.operation.name", "invoke_agent")
         agent_span.set_attribute("gen_ai.agent.name",     agent_name)
-        agent_span.set_attribute("gen_ai.provider.name",  "openai")
+        agent_span.set_attribute("gen_ai.provider.name",  "aws.bedrock")
 
         with tracer.start_as_current_span(f"chat {MODEL}") as span:
-            span.set_attribute("gen_ai.provider.name",  "openai")
+            span.set_attribute("gen_ai.provider.name",  "aws.bedrock")
             span.set_attribute("gen_ai.operation.name", "chat")
             span.set_attribute("gen_ai.request.model",  MODEL)
             span.set_attribute("gen_ai.agent.name",     agent_name)
@@ -112,7 +112,7 @@ def _call_agent(agent_name: str, user_message: str) -> str:
                 span.set_attribute("gen_ai.usage.input_tokens",  response.usage.prompt_tokens)
                 span.set_attribute("gen_ai.usage.output_tokens", response.usage.completion_tokens)
                 attrs = {
-                    "gen_ai.provider.name":  "openai",
+                    "gen_ai.provider.name":  "aws.bedrock",
                     "gen_ai.operation.name": "chat",
                     "gen_ai.request.model":  MODEL,
                     "gen_ai.response.model": response.model,

@@ -240,7 +240,7 @@ def triage(complaint: dict, collection: chromadb.Collection) -> None:
         # Its duration covers only the LLM call — not the retrieval — so you can
         # compare retrieval latency vs generation latency in the waterfall.
         with tracer.start_as_current_span(f"chat {MODEL}") as span:
-            span.set_attribute("gen_ai.provider.name",  "openai")
+            span.set_attribute("gen_ai.provider.name",  "aws.bedrock")
             span.set_attribute("gen_ai.operation.name", "chat")
             span.set_attribute("gen_ai.request.model",  MODEL)
             span.set_attribute("gen_ai.input.messages",
@@ -263,7 +263,7 @@ def triage(complaint: dict, collection: chromadb.Collection) -> None:
                 span.set_attribute("gen_ai.usage.input_tokens",  response.usage.prompt_tokens)
                 span.set_attribute("gen_ai.usage.output_tokens", response.usage.completion_tokens)
                 attrs = {
-                    "gen_ai.provider.name":  "openai",
+                    "gen_ai.provider.name":  "aws.bedrock",
                     "gen_ai.operation.name": "chat",
                     "gen_ai.request.model":  MODEL,
                     "gen_ai.response.model": response.model,

@@ -132,10 +132,10 @@ def _get_urgency(message: str) -> int:
     with tracer.start_as_current_span("invoke_agent sentiment") as agent_span:
         agent_span.set_attribute("gen_ai.operation.name", "invoke_agent")
         agent_span.set_attribute("gen_ai.agent.name",     "sentiment")
-        agent_span.set_attribute("gen_ai.provider.name",  "openai")
+        agent_span.set_attribute("gen_ai.provider.name",  "aws.bedrock")
 
         with tracer.start_as_current_span(f"chat {MODEL_CONTROL}") as span:
-            span.set_attribute("gen_ai.provider.name",  "openai")
+            span.set_attribute("gen_ai.provider.name",  "aws.bedrock")
             span.set_attribute("gen_ai.operation.name", "chat")
             span.set_attribute("gen_ai.request.model",  MODEL_CONTROL)
             span.set_attribute("gen_ai.agent.name",     "sentiment")
@@ -158,7 +158,7 @@ def _get_urgency(message: str) -> int:
                 span.set_attribute("gen_ai.usage.input_tokens",  response.usage.prompt_tokens)
                 span.set_attribute("gen_ai.usage.output_tokens", response.usage.completion_tokens)
                 attrs = {
-                    "gen_ai.provider.name":  "openai",
+                    "gen_ai.provider.name":  "aws.bedrock",
                     "gen_ai.operation.name": "chat",
                     "gen_ai.request.model":  MODEL_CONTROL,
                     "gen_ai.response.model": response.model,
@@ -225,7 +225,7 @@ def triage(complaint: dict) -> None:
         ]
 
         with tracer.start_as_current_span(f"chat {model}") as span:
-            span.set_attribute("gen_ai.provider.name",  "openai")
+            span.set_attribute("gen_ai.provider.name",  "aws.bedrock")
             span.set_attribute("gen_ai.operation.name", "chat")
             span.set_attribute("gen_ai.request.model",  model)
             span.set_attribute("gen_ai.input.messages",
@@ -248,7 +248,7 @@ def triage(complaint: dict) -> None:
                 span.set_attribute("gen_ai.usage.input_tokens",  response.usage.prompt_tokens)
                 span.set_attribute("gen_ai.usage.output_tokens", response.usage.completion_tokens)
                 attrs = {
-                    "gen_ai.provider.name":  "openai",
+                    "gen_ai.provider.name":  "aws.bedrock",
                     "gen_ai.operation.name": "chat",
                     "gen_ai.request.model":  model,
                     "gen_ai.response.model": response.model,

@@ -127,7 +127,7 @@ def respond(complaint: dict) -> None:
     # This means the span duration == total time to stream the full response,
     # which is the correct end-to-end latency for a streaming inference call.
     with tracer.start_as_current_span(f"chat {MODEL}") as span:
-        span.set_attribute("gen_ai.provider.name",  "openai")
+        span.set_attribute("gen_ai.provider.name",  "aws.bedrock")
         span.set_attribute("gen_ai.operation.name", "chat")
         span.set_attribute("gen_ai.request.model",  MODEL)
         span.set_attribute("gen_ai.request.stream", True)
@@ -173,7 +173,7 @@ def respond(complaint: dict) -> None:
                 span.set_attribute("gen_ai.usage.input_tokens",  chunk.usage.prompt_tokens)
                 span.set_attribute("gen_ai.usage.output_tokens", chunk.usage.completion_tokens)
                 metric_attrs = {
-                    "gen_ai.provider.name":  "openai",
+                    "gen_ai.provider.name":  "aws.bedrock",
                     "gen_ai.operation.name": "chat",
                     "gen_ai.request.model":  MODEL,
                 }
@@ -189,7 +189,7 @@ def respond(complaint: dict) -> None:
         if first_chunk_elapsed is not None:
             span.set_attribute("gen_ai.response.time_to_first_chunk", first_chunk_elapsed)
             ttfc.record(first_chunk_elapsed, {
-                "gen_ai.provider.name":  "openai",
+                "gen_ai.provider.name":  "aws.bedrock",
                 "gen_ai.operation.name": "chat",
                 "gen_ai.request.model":  MODEL,
             })

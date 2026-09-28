@@ -60,7 +60,7 @@ def process_batch(records, transform_fn, batch_size=100):
 
 def run_task(span_name: str, user_message: str) -> str:
     with tracer.start_as_current_span(span_name) as span:
-        span.set_attribute("gen_ai.provider.name",  "anthropic")
+        span.set_attribute("gen_ai.provider.name",  "aws.bedrock")
         span.set_attribute("gen_ai.operation.name", "chat")
         span.set_attribute("gen_ai.request.model",  MODEL)
 
@@ -76,7 +76,7 @@ def run_task(span_name: str, user_message: str) -> str:
             span.set_attribute("gen_ai.usage.output_tokens", response.usage.completion_tokens)
 
             common_attrs = {
-                "gen_ai.provider.name":  "anthropic",
+                "gen_ai.provider.name":  "aws.bedrock",
                 "gen_ai.operation.name": "chat",
                 "gen_ai.request.model":  MODEL,
                 "gen_ai.response.model": response.model,

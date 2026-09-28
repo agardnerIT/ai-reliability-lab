@@ -59,7 +59,7 @@ async def chat_completions(request: Request):
     developer_id = request.headers.get("X-Developer-ID", "unknown")
 
     with tracer.start_as_current_span(f"chat {model_name}") as span:
-        span.set_attribute("gen_ai.provider.name",  "anthropic")
+        span.set_attribute("gen_ai.provider.name",  "aws.bedrock")
         span.set_attribute("gen_ai.operation.name", "chat")
         span.set_attribute("gen_ai.request.model",  model_name)
         span.set_attribute("developer.id",          developer_id)
@@ -89,7 +89,7 @@ async def chat_completions(request: Request):
         span.set_attribute("gen_ai.usage.output_tokens",     output_tokens)
 
         common_attrs = {
-            "gen_ai.provider.name":  "anthropic",
+            "gen_ai.provider.name":  "aws.bedrock",
             "gen_ai.operation.name": "chat",
             "gen_ai.request.model":  model_name,
             "gen_ai.response.model": response_model,

@@ -42,15 +42,6 @@ token_usage = meter.create_histogram(
     description="Number of tokens used in a GenAI request",
 )
 
-# GenAI semantic convention constants
-_GEN_AI_PROVIDER_NAME   = "gen_ai.provider.name"
-_GEN_AI_OPERATION_NAME  = "gen_ai.operation.name"
-_GEN_AI_REQUEST_MODEL   = "gen_ai.request.model"
-_GEN_AI_RESPONSE_MODEL  = "gen_ai.response.model"
-_GEN_AI_FINISH_REASONS  = "gen_ai.response.finish_reasons"
-_GEN_AI_INPUT_TOKENS    = "gen_ai.usage.input_tokens"
-_GEN_AI_OUTPUT_TOKENS   = "gen_ai.usage.output_tokens"
-
 # --- client ---
 client = OpenAI(
     api_key=provide_token(),
@@ -65,9 +56,9 @@ operation = "chat"
 span_name = f"{operation} {MODEL}"
 
 with tracer.start_as_current_span(span_name) as span:
-    span.set_attribute(_GEN_AI_PROVIDER_NAME, "openai")
-    span.set_attribute(_GEN_AI_OPERATION_NAME, operation)
-    span.set_attribute(_GEN_AI_REQUEST_MODEL, MODEL)
+    span.set_attribute("gen_ai.provider.name", "aws.bedrock")
+    span.set_attribute("gen_ai.operation.name", operation)
+    span.set_attribute("gen_ai.request.model", MODEL)
 
     # gen_ai.input.messages is an opt-in span attribute per OTel GenAI semconv.
     # Recorded as a JSON string (structured form) per spec §gen-ai-spans.
@@ -77,17 +68,14 @@ with tracer.start_as_current_span(span_name) as span:
     response = client.chat.completions.create(model=MODEL, messages=MESSAGES)
 
     # Response attributes
-    span.set_attribute(_GEN_AI_RESPONSE_MODEL, response.model)
-    span.set_attribute(
-        _GEN_AI_FINISH_REASONS,
-        [c.finish_reason for c in response.choices],
-    )
+    span.set_attribute("gen_ai.response.model", response.model)
+    span.set_attribute("gen_ai.response.finish_reasons", [c.finish_reason for c in response.choices])
     if response.usage:
-        span.set_attribute(_GEN_AI_INPUT_TOKENS, response.usage.prompt_tokens)
-        span.set_attribute(_GEN_AI_OUTPUT_TOKENS, response.usage.completion_tokens)
+        span.set_attribute("gen_ai.usage.input_tokens", response.usage.prompt_tokens)
+        span.set_attribute("gen_ai.usage.output_tokens", response.usage.completion_tokens)
 
         common_attrs = {
-            "gen_ai.provider.name":  "openai",
+            "gen_ai.provider.name":  "aws.bedrock",
             "gen_ai.operation.name": operation,
             "gen_ai.request.model":  MODEL,
             "gen_ai.response.model": response.model,
