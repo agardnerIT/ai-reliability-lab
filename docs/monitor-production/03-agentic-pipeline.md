@@ -41,6 +41,7 @@ We move from a single AI call to a **multi-agent pipeline**: multiple AI models 
 An **agent** is just an AI model given a specific job through a system prompt. It's a normal model call, but with a role and instructions that constrain what it does.
 
 For example:
+
 - A **sentiment agent** always analyses text and returns a score. It doesn't draft responses or check policies.
 - A **policy checker agent** always consults the rules and recommends actions. It doesn't write to customers.
 - A **draft response agent** always writes polished text. It doesn't make decisions about what to offer.
@@ -188,6 +189,8 @@ Storing system prompts as files (not hardcoded strings) means you can edit agent
 
 ## What you see in Dynatrace
 
+After running, wait about **60 seconds** for data to arrive, then query from the terminal.
+
 Each complaint produces one trace. Open it and you see the full waterfall:
 
 - The root `triage` span covering the entire operation
@@ -196,6 +199,60 @@ Each complaint produces one trace. Open it and you see the full waterfall:
 - Token counts on each `chat` span
 - `complaint.urgency` and `complaint.sentiment` on the root span, set after the sentiment agent runs
 - `triage.outcome` on the root span to see how it was resolved
+
+### Check the triage traces
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-triage-pipeline"
+| filter transaction.is_root_span == true
+| fieldsAdd dur_ns = toLong(duration)
+| fieldsAdd duration_readable = concat(toString(tolong(dur_ns / 60000000000)), "m ", toString(round((dur_ns / 1000000000) - (tolong(dur_ns / 60000000000) * 60), decimals:1)), "s")
+| fields start_time, span.name, complaint.id, complaint.customer, complaint.sentiment, complaint.urgency, triage.outcome, duration_readable
+| sort start_time desc
+| limit 10'
+```
+
+You should see one row per complaint with the customer name, urgency score, sentiment, and outcome (`escalated` or `responded`). The `duration_readable` column shows the total triage time as `Xm Ys`.
+
+### See per-agent latency and token usage
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-triage-pipeline"
+| filter gen_ai.operation.name == "chat"
+| fieldsAdd dur_ns = toLong(duration)
+| summarize
+    calls = count(),
+    min_s = round(min(dur_ns) / 1000000000, decimals:2),
+    avg_s = round(avg(dur_ns) / 1000000000, decimals:2),
+    max_s = round(max(dur_ns) / 1000000000, decimals:2),
+    avg_input_tokens = round(avg(gen_ai.usage.input_tokens), decimals:0),
+    avg_output_tokens = round(avg(gen_ai.usage.output_tokens), decimals:0),
+    by: {gen_ai.agent.name}
+| sort avg_s desc'
+```
+
+Each row is one agent. `avg_s`, `min_s`, and `max_s` are in seconds. Sort by `avg_s desc` puts the slowest agent first. Compare `avg_input_tokens` across agents to see which is most expensive to run.
+
+### Check the escalation rate
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-triage-pipeline"
+| filter transaction.is_root_span == true
+| summarize count(), by: {triage.outcome}'
+```
+
+You'll get a breakdown of how many complaints were escalated versus responded to.
+
+### Check total token usage by agent
+
+```bash
+dtctl query 'timeseries tokens = sum(gen_ai.client.token.usage), by: {gen_ai.agent.name, gen_ai.token.type}
+| fieldsAdd total = arraySum(tokens)
+| fields gen_ai.agent.name, gen_ai.token.type, total'
+```
 
 This lets you answer questions like:
 - Which agent is slowest?

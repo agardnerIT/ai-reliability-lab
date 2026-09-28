@@ -18,7 +18,7 @@ Once you've read the concepts, work through **[Setup](setup.md)** before startin
 
 - AWS credentials (no AWS CLI required)
 - Dynatrace API and platform tokens
-- Choosing your environment (Codespaces, local dev container, or plain Python)
+- Choosing your environment (Codespaces)
 - Verifying the end-to-end pipeline with a smoke test
 
 ## Your progress

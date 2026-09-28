@@ -275,6 +275,8 @@ The agentic loop shines when complaints are diverse and the model can skip unnec
 
 ## What you'll see in Dynatrace
 
+After running, wait about **60 seconds** for data to arrive, then query from the terminal.
+
 Open a trace for a complaint and you'll see something like:
 
 - The root `triage` span with `triage.outcome` set to `responded` or `escalated`, and `triage.turns` showing how many orchestrator turns it took
@@ -288,6 +290,59 @@ Compare two complaints side-by-side:
 - An obvious escalation might skip policy and draft entirely
 
 This variance is exactly what you're paying for with an agentic architecture, and exactly why you need traces to understand it.
+
+### Check triage outcomes and turns
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-triage-loop"
+| filter transaction.is_root_span == true
+| fieldsAdd dur_ns = toLong(duration)
+| fieldsAdd duration_readable = concat(toString(tolong(dur_ns / 60000000000)), "m ", toString(round((dur_ns / 1000000000) - (tolong(dur_ns / 60000000000) * 60), decimals:1)), "s")
+| fields start_time, complaint.id, complaint.customer, triage.outcome, triage.turns, duration_readable
+| sort start_time desc
+| limit 10'
+```
+
+`triage.turns` tells you how many orchestrator iterations the model needed before it stopped. A higher number means more back-and-forth before a decision.
+
+### See which tools the model chose
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-triage-loop"
+| filter gen_ai.operation.name == "execute_tool"
+| fields start_time, trace.id, tool.name, tool.result_length
+| sort start_time desc
+| limit 20'
+```
+
+This shows you the exact sequence of tool calls the model requested. All spans sharing the same `trace.id` belong to one run, so if you run C001 twice you can compare the two traces side by side. Look for complaints where the model skipped tools (e.g. escalating without calling `check_policy`) or called them in an unexpected order.
+
+### Compare orchestrator vs sub-agent token usage
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-triage-loop"
+| filter gen_ai.operation.name == "chat"
+| summarize
+    calls = count(),
+    avg_input_tokens = round(avg(gen_ai.usage.input_tokens), decimals:0),
+    avg_output_tokens = round(avg(gen_ai.usage.output_tokens), decimals:0),
+    by: {gen_ai.agent.name}
+| sort avg_input_tokens desc'
+```
+
+The orchestrator's `gen_ai.agent.name` will be null (it is not a sub-agent). Sub-agents appear by name. Orchestrator input tokens grow each turn because the full conversation history is sent every iteration — this is where loop costs can creep up.
+
+### Check the escalation rate
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-triage-loop"
+| filter transaction.is_root_span == true
+| summarize count(), by: {triage.outcome}'
+```
 
 ## What's next?
 

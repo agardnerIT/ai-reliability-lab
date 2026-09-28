@@ -42,7 +42,7 @@ Complete [Foundation → Setup](../foundation/setup.md) before running any exerc
 
 - [ ] AWS credentials (no AWS CLI required — environment variables work)
 - [ ] Dynatrace API token and platform token
-- [ ] Choosing your environment (Codespaces, dev container, or plain Python)
+- [ ] Codespaces environment (see [Foundation → Setup](../foundation/setup.md))
 - [ ] Verifying the OTel Collector is running on `localhost:4318`
 
 !!! tip "Just want to read along?"

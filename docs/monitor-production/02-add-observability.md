@@ -53,34 +53,9 @@ We take the single-call app from Step 1 and add OpenTelemetry instrumentation so
 
 ## Before you start
 
-Make sure the OpenTelemetry collector is running (`docker ps` from your host machine **not** the devcontainer) and that your Dynatrace credentials are set.
-
-**Codespaces or local dev container (Options 1 and 2)**
-
-The collector starts automatically alongside your environment. You don't need to run anything.
+The OTel Collector starts automatically alongside your Codespace. You don't need to run anything.
 
 To point it at your Dynatrace tenant, follow the [Adding your Dynatrace token](../foundation/environment-setup.md#adding-your-dynatrace-token) steps in Environment Setup if you haven't already.
-
-**Plain Python, no containers (Option 3)**
-
-Open a new terminal, set your credentials, and start the collector manually:
-
-```bash
-export DT_TENANT=abc12345
-export DT_API_TOKEN=dt0c01.*****.*******
-
-touch file.log
-
-docker run --rm \
-  -p 4318:4318 \
-  -e DT_TENANT \
-  -e DT_API_TOKEN \
-  -v $(pwd)/collector.config.yaml:/etc/otelcol-contrib/config.yaml \
-  -v $(pwd)/file.log:/etc/file.log \
-  otel/opentelemetry-collector-contrib:latest
-```
-
-Leave that terminal open. The collector needs to be running while you work through the steps below.
 
 ## Running it
 
