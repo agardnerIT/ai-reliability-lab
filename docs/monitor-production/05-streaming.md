@@ -159,6 +159,8 @@ This follows the [OpenTelemetry GenAI semantic conventions](https://opentelemetr
 
 ## What you'll see in Dynatrace
 
+After running, wait about **60 seconds** for data to arrive, then query from the terminal.
+
 Each trace will have a single `chat` span whose duration is the full streaming time. On that span you will see:
 
 - `gen_ai.request.stream: true` confirming this was a streaming call
@@ -170,6 +172,37 @@ In **Metrics**, you will find two histograms:
 
 - `gen_ai.client.token.usage` (the same one from Step 2, now populated from streaming)
 - `gen_ai.client.operation.time_to_first_chunk` (streaming-specific, in seconds)
+
+### Check the streaming spans
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-streaming"
+| filter gen_ai.operation.name == "chat"
+| fieldsAdd dur_ns = toLong(duration)
+| fieldsAdd duration_readable = concat(toString(tolong(dur_ns / 60000000000)), "m ", toString(round((dur_ns / 1000000000) - (tolong(dur_ns / 60000000000) * 60), decimals:1)), "s")
+| fields start_time, trace.id, span.name, duration_readable, gen_ai.response.time_to_first_chunk, gen_ai.usage.input_tokens, gen_ai.usage.output_tokens
+| sort start_time desc
+| limit 10'
+```
+
+Each row is one streaming call. The `span.name` will be `chat openai.gpt-oss-120b` and its parent root span is `respond {complaint_id}` — use `trace.id` to link them. Compare `gen_ai.response.time_to_first_chunk` (in seconds) against `duration_readable` (total time). A small TTFC relative to the total means the model started generating quickly — most of the time was spent streaming tokens. A large TTFC means the model was slow to start.
+
+### Check time-to-first-chunk over time
+
+```bash
+dtctl query 'timeseries ttfc = avg(gen_ai.client.operation.time_to_first_chunk), by: {gen_ai.request.model}
+| fieldsAdd avg_ttfc = arrayAvg(ttfc)
+| fields gen_ai.request.model, avg_ttfc'
+```
+
+### Check token usage
+
+```bash
+dtctl query 'timeseries tokens = sum(gen_ai.client.token.usage), by: {gen_ai.token.type}
+| fieldsAdd total = arraySum(tokens)
+| fields gen_ai.token.type, total'
+```
 
 Compare `time_to_first_chunk` against span duration across complaints. If the first-chunk time is consistently close to the total duration, the model is generating quickly but you have network or streaming overhead. If it is high relative to the total, the model is slow to start.
 

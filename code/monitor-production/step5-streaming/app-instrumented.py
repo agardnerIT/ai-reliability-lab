@@ -110,11 +110,12 @@ client = OpenAI(
 # Stream a response for a single complaint
 # ---------------------------------------------------------------------------
 def respond(complaint: dict) -> None:
+    cid      = complaint["id"]
     customer = complaint["customer"]
     message  = complaint["message"]
 
     print(f"\n{'='*60}")
-    print(f"Complaint {complaint['id']} — {customer}")
+    print(f"Complaint {cid} — {customer}")
     print(f"  \"{message}\"")
     print(f"\n  Streaming response:\n\n  ")
 
@@ -123,85 +124,89 @@ def respond(complaint: dict) -> None:
         {"role": "user",   "content": f"Customer name: {customer}\nComplaint: {message}"},
     ]
 
-    # The span opens before the stream does and closes after iteration ends.
-    # This means the span duration == total time to stream the full response,
-    # which is the correct end-to-end latency for a streaming inference call.
-    with tracer.start_as_current_span(f"chat {MODEL}") as span:
-        span.set_attribute("gen_ai.provider.name",  "aws.bedrock")
-        span.set_attribute("gen_ai.operation.name", "chat")
-        span.set_attribute("gen_ai.request.model",  MODEL)
-        span.set_attribute("gen_ai.request.stream", True)
-        span.set_attribute("gen_ai.input.messages",
-                           json.dumps([{"role": "user", "content": message}]))
+    with tracer.start_as_current_span(f"respond {cid}") as root:
+        root.set_attribute("complaint.id",       cid)
+        root.set_attribute("complaint.customer", customer)
 
-        # Start the clock immediately before opening the stream so we capture
-        # any connection/scheduling overhead in the time-to-first-chunk measurement.
-        start = time.perf_counter()
-        first_chunk_elapsed: float | None = None
+        # The span opens before the stream does and closes after iteration ends.
+        # This means the span duration == total time to stream the full response,
+        # which is the correct end-to-end latency for a streaming inference call.
+        with tracer.start_as_current_span(f"chat {MODEL}") as span:
+            span.set_attribute("gen_ai.provider.name",  "aws.bedrock")
+            span.set_attribute("gen_ai.operation.name", "chat")
+            span.set_attribute("gen_ai.request.model",  MODEL)
+            span.set_attribute("gen_ai.request.stream", True)
+            span.set_attribute("gen_ai.input.messages",
+                               json.dumps([{"role": "user", "content": message}]))
 
-        stream = client.chat.completions.create(
-            model=MODEL,
-            messages=messages,
-            stream=True,
-            # include_usage=True causes the provider to emit a final chunk
-            # containing token counts. Without this, usage is unavailable in
-            # streaming mode and gen_ai.usage.* cannot be set on the span.
-            stream_options={"include_usage": True},
-        )
+            # Start the clock immediately before opening the stream so we capture
+            # any connection/scheduling overhead in the time-to-first-chunk measurement.
+            start = time.perf_counter()
+            first_chunk_elapsed: float | None = None
 
-        content_chunks: list[str] = []
-        finish_reason: str | None = None
+            stream = client.chat.completions.create(
+                model=MODEL,
+                messages=messages,
+                stream=True,
+                # include_usage=True causes the provider to emit a final chunk
+                # containing token counts. Without this, usage is unavailable in
+                # streaming mode and gen_ai.usage.* cannot be set on the span.
+                stream_options={"include_usage": True},
+            )
 
-        for chunk in stream:
-            # Content chunks — accumulate for the final gen_ai.output.messages attribute
-            # and record time-to-first-chunk on the first one.
-            if chunk.choices and chunk.choices[0].delta.content:
-                if first_chunk_elapsed is None:
-                    first_chunk_elapsed = time.perf_counter() - start
-                delta = chunk.choices[0].delta.content
-                content_chunks.append(delta)
-                print(delta, end="", flush=True)
+            content_chunks: list[str] = []
+            finish_reason: str | None = None
 
-            # finish_reason arrives on the last content chunk (choices[0].finish_reason
-            # is None on all prior chunks).
-            if chunk.choices and chunk.choices[0].finish_reason:
-                finish_reason = chunk.choices[0].finish_reason
+            for chunk in stream:
+                # Content chunks — accumulate for the final gen_ai.output.messages attribute
+                # and record time-to-first-chunk on the first one.
+                if chunk.choices and chunk.choices[0].delta.content:
+                    if first_chunk_elapsed is None:
+                        first_chunk_elapsed = time.perf_counter() - start
+                    delta = chunk.choices[0].delta.content
+                    content_chunks.append(delta)
+                    print(delta, end="", flush=True)
 
-            # Token usage arrives on a final empty chunk (no choices) when
-            # stream_options={"include_usage": True} is set.
-            if chunk.usage:
-                span.set_attribute("gen_ai.usage.input_tokens",  chunk.usage.prompt_tokens)
-                span.set_attribute("gen_ai.usage.output_tokens", chunk.usage.completion_tokens)
-                metric_attrs = {
+                # finish_reason arrives on the last content chunk (choices[0].finish_reason
+                # is None on all prior chunks).
+                if chunk.choices and chunk.choices[0].finish_reason:
+                    finish_reason = chunk.choices[0].finish_reason
+
+                # Token usage arrives on a final empty chunk (no choices) when
+                # stream_options={"include_usage": True} is set.
+                if chunk.usage:
+                    span.set_attribute("gen_ai.usage.input_tokens",  chunk.usage.prompt_tokens)
+                    span.set_attribute("gen_ai.usage.output_tokens", chunk.usage.completion_tokens)
+                    metric_attrs = {
+                        "gen_ai.provider.name":  "aws.bedrock",
+                        "gen_ai.operation.name": "chat",
+                        "gen_ai.request.model":  MODEL,
+                    }
+                    token_usage.record(chunk.usage.prompt_tokens,
+                                       {**metric_attrs, "gen_ai.token.type": "input"})
+                    token_usage.record(chunk.usage.completion_tokens,
+                                       {**metric_attrs, "gen_ai.token.type": "output"})
+
+            # --- Deferred span attributes — set after the stream is fully consumed ---
+
+            # gen_ai.response.time_to_first_chunk: how long before content started arriving.
+            # Only set if at least one content chunk was received.
+            if first_chunk_elapsed is not None:
+                span.set_attribute("gen_ai.response.time_to_first_chunk", first_chunk_elapsed)
+                ttfc.record(first_chunk_elapsed, {
                     "gen_ai.provider.name":  "aws.bedrock",
                     "gen_ai.operation.name": "chat",
                     "gen_ai.request.model":  MODEL,
-                }
-                token_usage.record(chunk.usage.prompt_tokens,
-                                   {**metric_attrs, "gen_ai.token.type": "input"})
-                token_usage.record(chunk.usage.completion_tokens,
-                                   {**metric_attrs, "gen_ai.token.type": "output"})
+                })
 
-        # --- Deferred span attributes — set after the stream is fully consumed ---
-
-        # gen_ai.response.time_to_first_chunk: how long before content started arriving.
-        # Only set if at least one content chunk was received.
-        if first_chunk_elapsed is not None:
-            span.set_attribute("gen_ai.response.time_to_first_chunk", first_chunk_elapsed)
-            ttfc.record(first_chunk_elapsed, {
-                "gen_ai.provider.name":  "aws.bedrock",
-                "gen_ai.operation.name": "chat",
-                "gen_ai.request.model":  MODEL,
-            })
-
-        span.set_attribute("gen_ai.response.finish_reasons",
-                           [finish_reason] if finish_reason else [])
-        span.set_attribute("gen_ai.output.messages",
-                           json.dumps([{
-                               "role":         "assistant",
-                               "content":      "".join(content_chunks),
-                               "finish_reason": finish_reason,
-                           }]))
+            span.set_attribute("gen_ai.response.finish_reasons",
+                               [finish_reason] if finish_reason else [])
+            span.set_attribute("gen_ai.output.messages",
+                               json.dumps([{
+                                   "role":         "assistant",
+                                   "content":      "".join(content_chunks),
+                                   "finish_reason": finish_reason,
+                               }]))
 
     print("\n")
 
