@@ -178,7 +178,7 @@ Everything runs inside **two containers** on your machine:
 | **AI Lab Dev Container** | Runs your exercise Python code and the `dtctl` CLI |
 | **OpenTelemetry Collector** | Receives telemetry from your code and forwards it to Dynatrace |
 
-Docker Desktop is the only thing you install on your host machine. When the lab is over, stop and delete both containers — your machine is unchanged.
+A container runtime that provides `docker` and `docker compose` (such as Rancher Desktop or Docker Desktop) is the only thing you install on your host machine. When the lab is over, stop and delete both containers — your machine is unchanged.
 
 Two external services are involved:
 
@@ -191,7 +191,7 @@ This is why you need **five values** from Step 1: two AWS credentials plus a gua
 
 ## Step 2: Start the dev container
 
-Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) and [VS Code](https://code.visualstudio.com/) with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
+Requires a container runtime that provides `docker` and `docker compose` (see [Prerequisites](prerequisites.md#container-runtime)) and [VS Code](https://code.visualstudio.com/) with the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
 
 1. Clone your fork:
 
@@ -212,7 +212,7 @@ Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) and [
     DTCTL_PLATFORM_TOKEN=dt0s16.XXXX...
     ```
 
-3. **AWS credentials:** the dev container mounts your `~/.aws` folder automatically. If you previously ran `aws configure` or `aws sso login`, your credentials are already available inside the container — nothing else to do. If not, add them to `.devcontainer/.env` as well:
+3. **AWS credentials:** the dev container mounts your `~/.aws` folder automatically. The folder must exist on your machine or the container won't start, so run `mkdir -p ~/.aws` if you don't have one. If you previously ran `aws configure` or `aws sso login`, your credentials are already available inside the container — nothing else to do. If not, add them to `.devcontainer/.env` as well:
 
     ```
     AWS_ACCESS_KEY_ID=AKIA...

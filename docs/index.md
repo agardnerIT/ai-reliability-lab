@@ -14,7 +14,7 @@ A few concepts come up constantly in these tutorials. Spending 15 minutes here w
 | [OpenTelemetry](foundation/opentelemetry.md) | The standard we use to collect data from AI apps. All our examples use it. |
 | [AWS Bedrock](foundation/aws-bedrock.md) | The AI platform used in these tutorials. |
 
-Then work through **[Setup](foundation/setup.md)** before running any code. The first thing it asks you to do is **fork this repository into your own GitHub account** — you don't have write access to the source, so you need your own copy before you can store secrets or use Codespaces. After that it walks you through credentials, environment options, and a smoke test.
+Check the **[Prerequisites](foundation/prerequisites.md)** to make sure you have the right accounts and tools, then work through **[Setup](foundation/setup.md)** before running any code. The first thing it asks you to do is **fork this repository into your own GitHub account** — you don't have write access to the source, so you need your own copy before you can store secrets or use Codespaces. After that it walks you through credentials, environment options, and a smoke test.
 
 !!! tip "Already familiar with OTel and Bedrock?"
     Skip straight to [Setup](foundation/setup.md), then pick a path below.

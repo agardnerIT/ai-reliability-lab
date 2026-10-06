@@ -76,6 +76,8 @@ plugins:
 
 nav:
   - Home: index.md
+  - Prerequisites: foundation/prerequisites.md
+  - Setup: foundation/setup.md
   - Foundation:
     - foundation/index.md
     - Tokens: foundation/tokens.md
