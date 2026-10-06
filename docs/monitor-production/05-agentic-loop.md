@@ -1,4 +1,4 @@
-# Step 4: Agentic Loop
+# Step 5: Agentic Loop
 
 <div class="dt-trail">
   <div class="dt-trail-item">
@@ -10,23 +10,23 @@
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="03-agentic-pipeline.md" class="dt-trail-step inactive">Step 3: Pipeline</a>
+    <a href="03-guardrails.md" class="dt-trail-step inactive">Step 3: Guardrails</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <span class="dt-trail-step">Step 4: Loop</span>
+    <a href="04-agentic-pipeline.md" class="dt-trail-step inactive">Step 4: Pipeline</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="05-streaming.md" class="dt-trail-step inactive">Step 5: Streaming</a>
+    <span class="dt-trail-step">Step 5: Loop</span>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="06-rag.md" class="dt-trail-step inactive">Step 6: RAG</a>
+    <a href="06-streaming.md" class="dt-trail-step inactive">Step 6: Streaming</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="07-guardrails.md" class="dt-trail-step inactive">Step 7: Guardrails</a>
+    <a href="07-rag.md" class="dt-trail-step inactive">Step 7: RAG</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
@@ -47,7 +47,7 @@ The model looks at the complaint, looks at the available tools, and chooses what
 ## Running it
 
 ```bash
-cd code/monitor-production/step4-agentic-loop
+cd code/monitor-production/step5-agentic-loop
 
 export AWS_REGION=us-east-2
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
@@ -346,10 +346,10 @@ dtctl query 'fetch spans
 
 ## What's next?
 
-In [Step 5](05-streaming.md), we take the same single-call instrumentation from Step 2 and adapt it for streaming responses, adding a new metric that only makes sense in a streaming context: time-to-first-chunk.
+In [Step 6](06-streaming.md), we take the same single-call instrumentation from Step 2 and adapt it for streaming responses, adding a new metric that only makes sense in a streaming context: time-to-first-chunk.
 
 <div id="dt-quiz-anchor"></div>
 
 ## Next step
 
-[Step 5: Streaming →](05-streaming.md)
+[Step 6: Streaming →](06-streaming.md)

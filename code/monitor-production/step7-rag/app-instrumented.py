@@ -111,6 +111,9 @@ client = OpenAI(
 def _build_index(policy_path: pathlib.Path) -> chromadb.Collection:
     with tracer.start_as_current_span("index policy") as span:
         span.set_attribute("gen_ai.operation.name", "index")
+        span.set_attribute("db.system.name",        "chroma")
+        span.set_attribute("db.operation.name",     "upsert")
+        span.set_attribute("db.collection.name",    "policy")
         span.set_attribute("policy.file", policy_path.name)
 
         chroma     = chromadb.Client()
@@ -170,6 +173,9 @@ def _retrieve(collection: chromadb.Collection, query: str, n: int = 3) -> list[s
     # separately from LLM latency in the trace waterfall.
     with tracer.start_as_current_span("retrieval") as span:
         span.set_attribute("gen_ai.operation.name", "retrieval")
+        span.set_attribute("db.system.name",        "chroma")
+        span.set_attribute("db.operation.name",     "query")
+        span.set_attribute("db.collection.name",    "policy")
         span.set_attribute("retrieval.query",        query)
         span.set_attribute("retrieval.n_results",    n)
 

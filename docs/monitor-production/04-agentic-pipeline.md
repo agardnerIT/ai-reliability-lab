@@ -1,4 +1,4 @@
-# Step 3: Agentic Pipeline
+# Step 4: Agentic Pipeline
 
 <div class="dt-trail">
   <div class="dt-trail-item">
@@ -10,23 +10,23 @@
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <span class="dt-trail-step">Step 3: Pipeline</span>
+    <a href="03-guardrails.md" class="dt-trail-step inactive">Step 3: Guardrails</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="04-agentic-loop.md" class="dt-trail-step inactive">Step 4: Loop</a>
+    <span class="dt-trail-step">Step 4: Pipeline</span>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="05-streaming.md" class="dt-trail-step inactive">Step 5: Streaming</a>
+    <a href="05-agentic-loop.md" class="dt-trail-step inactive">Step 5: Loop</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="06-rag.md" class="dt-trail-step inactive">Step 6: RAG</a>
+    <a href="06-streaming.md" class="dt-trail-step inactive">Step 6: Streaming</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="07-guardrails.md" class="dt-trail-step inactive">Step 7: Guardrails</a>
+    <a href="07-rag.md" class="dt-trail-step inactive">Step 7: RAG</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
@@ -68,7 +68,7 @@ Our pipeline processes customer complaints:
 ## Running it
 
 ```bash
-cd code/monitor-production/step3-agentic-pipeline
+cd code/monitor-production/step4-agentic-pipeline
 
 export AWS_REGION=us-east-2
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
@@ -79,7 +79,7 @@ python app-instrumented.py C001   # run a specific complaint
 
 ## The code (uninstrumented)
 
-```python title="step3-agentic-pipeline/app.py"
+```python title="step4-agentic-pipeline/app.py"
 def triage(complaint: dict) -> None:
     # Step 1: sentiment always runs first
     raw = _call_agent("sentiment", message)
@@ -274,6 +274,6 @@ If your workflow is stable and well-understood, a pipeline is often the right ch
 
 ## Next step
 
-[Step 4: Agentic Loop →](04-agentic-loop.md)
+[Step 5: Agentic Loop →](05-agentic-loop.md)
 
-Step 4 covers the alternative: a loop where the model decides which tools to call and in what order.
+Step 5 covers the alternative: a loop where the model decides which tools to call and in what order.

@@ -1,4 +1,4 @@
-# Step 6: RAG
+# Step 7: RAG
 
 <div class="dt-trail">
   <div class="dt-trail-item">
@@ -10,23 +10,23 @@
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="03-agentic-pipeline.md" class="dt-trail-step inactive">Step 3: Pipeline</a>
+    <a href="03-guardrails.md" class="dt-trail-step inactive">Step 3: Guardrails</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="04-agentic-loop.md" class="dt-trail-step inactive">Step 4: Loop</a>
+    <a href="04-agentic-pipeline.md" class="dt-trail-step inactive">Step 4: Pipeline</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="05-streaming.md" class="dt-trail-step inactive">Step 5: Streaming</a>
+    <a href="05-agentic-loop.md" class="dt-trail-step inactive">Step 5: Loop</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <span class="dt-trail-step">Step 6: RAG</span>
+    <a href="06-streaming.md" class="dt-trail-step inactive">Step 6: Streaming</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="07-guardrails.md" class="dt-trail-step inactive">Step 7: Guardrails</a>
+    <span class="dt-trail-step">Step 7: RAG</span>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
@@ -41,7 +41,7 @@ This adds a new operation to the trace: the retrieval step.
 ## Running it
 
 ```bash
-cd code/monitor-production/step6-rag
+cd code/monitor-production/step7-rag
 
 export AWS_REGION=us-east-2
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
@@ -95,6 +95,9 @@ The retrieval step is a child span with its own instrumentation:
 ```python
 with tracer.start_as_current_span("retrieval") as span:
     span.set_attribute("gen_ai.operation.name", "retrieval")
+    span.set_attribute("db.system.name",        "chroma")
+    span.set_attribute("db.operation.name",     "query")
+    span.set_attribute("db.collection.name",    "policy")
     span.set_attribute("retrieval.query",        query)
     span.set_attribute("retrieval.n_results",    n)
 
@@ -111,7 +114,7 @@ with tracer.start_as_current_span("retrieval") as span:
     })
 ```
 
-`gen_ai.operation.name = "retrieval"` follows the OTel GenAI semantic conventions for vector search operations. The span duration covers the embedding of the query and the similarity search, so you can see vector store latency separately from LLM latency in the trace waterfall.
+`gen_ai.operation.name = "retrieval"` follows the OTel GenAI semantic conventions for vector search operations. `db.system.name`, `db.operation.name`, and `db.collection.name` follow the [OTel database semantic conventions](https://opentelemetry.io/docs/specs/semconv/database/) and identify this as a ChromaDB query against the `policy` collection — Dynatrace uses these to correlate the span with the vector store as a backing service. The span duration covers the embedding of the query and the similarity search, so you can see vector store latency separately from LLM latency in the trace waterfall.
 
 The key attribute here is `retrieval.matched_sections`. It records which policy sections were actually returned, so you can answer "what context did the model see?" directly from the trace, without re-running the query.
 
@@ -140,7 +143,7 @@ This tracks how many chunks are returned per complaint. A consistently low value
 
 Before setting an alert on this metric, check how your vector database (we use the open source vector database [ChromaDB](https://github.com/chroma-core/chroma) for this demo) is configured, because that determines whether the metric can vary at all.
 
-```python title="step6-rag/app-instrumented.py"
+```python title="step7-rag/app-instrumented.py"
 RETRIEVAL_THRESHOLD = 0.5
 
 chroma     = chromadb.Client()
@@ -200,33 +203,71 @@ For a small policy document, the agentic pipeline sends the whole policy file to
 
 ## What you'll see in Dynatrace
 
+After running, wait about **60 seconds** for data to arrive, then query from the terminal.
+
 Each trace has three spans. Open one and you'll see:
 
 - The root `triage` span with `complaint.id`, `complaint.customer`, and `retrieval.matched_sections`
 - A `retrieval` child span showing the query, how many chunks were requested, and which sections were returned. Duration here is the vector search latency.
 - A `chat` child span with the full GenAI attributes (model, token counts, input/output messages). Duration here is the LLM latency.
 
-Compare retrieval duration vs chat duration across complaints. If retrieval latency is close to LLM latency, the vector store is a meaningful part of your response time. If it's near zero, the bottleneck is entirely in the model.
+### Check triage traces with matched policy sections
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-rag"
+| filter transaction.is_root_span == true
+| fields start_time, complaint.id, complaint.customer, retrieval.matched_sections
+| sort start_time desc
+| limit 10'
+```
+
+`retrieval.matched_sections` shows exactly which policy sections the model saw for each complaint — no need to re-run the query to find out.
+
+### Compare retrieval vs LLM latency
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-rag"
+| filter gen_ai.operation.name in ("retrieval", "chat")
+| fieldsAdd dur_ns = toLong(duration)
+| summarize
+    calls = count(),
+    avg_s = round(avg(dur_ns) / 1000000000, decimals:2),
+    max_s = round(max(dur_ns) / 1000000000, decimals:2),
+    by: {gen_ai.operation.name}
+| sort avg_s desc'
+```
+
+If `retrieval` latency is close to `chat` latency, the vector store is a meaningful part of your response time. If it is near zero, the bottleneck is entirely in the model.
+
+### Check retrieval chunk counts
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-rag"
+| filter gen_ai.operation.name == "retrieval"
+| fields start_time, db.system.name, db.collection.name, retrieval.query, retrieval.chunk_count, retrieval.n_results, retrieval.threshold
+| sort start_time desc
+| limit 10'
+```
+
+`db.system.name` confirms the vector store backend (`chroma`) and `db.collection.name` identifies the collection queried. Compare `retrieval.chunk_count` against `retrieval.n_results`. If chunk count consistently equals n_results, the threshold may be too loose — everything is matching. If it is consistently low or zero, the retrieval is too narrow for some complaint types.
+
+### Check chunk count metric over time
+
+```bash
+dtctl query 'timeseries chunks = avg(rag.retrieval.chunk_count)
+| fieldsAdd avg_chunks = arrayAvg(chunks)
+| fields avg_chunks'
+```
 
 In **Metrics**, `rag.retrieval.chunk_count` shows whether your retrieval is returning focused results or casting too wide a net.
-
-## Summary
-
-You have now seen the full progression:
-
-| | What runs | Observability |
-|--|----------|--------------|
-| **Step 1** | One AI call, no OTel | None |
-| **Step 2** | One AI call, with OTel | 1 span, token histogram |
-| **Step 3** | Fixed pipeline of agents | Predictable nested spans |
-| **Step 4** | Model-driven agentic loop | Variable nested spans |
-| **Step 5** | Streaming response | 1 span with time-to-first-chunk metric |
-| **Step 6** | RAG | retrieval + chat spans, chunk count metric |
-
-The span and metric patterns are consistent throughout. What changes with each step is the shape of the operation you're observing.
 
 <div id="dt-quiz-anchor"></div>
 
 ## What's next?
 
-In [Step 7](07-guardrails.md), we tackle prompt injection: users who try to sneak off-topic tasks into a legitimate question. You will configure an AWS Bedrock Guardrail to block them, then add the instrumentation that makes guardrail activity visible in Dynatrace.
+You've now instrumented every shape of AI operation this app makes: a single call, a fixed pipeline, an autonomous loop, streaming, and retrieval. In [Step 8](08-model-selection.md), we put that instrumentation to work on a production decision: migrating from one model to another with real traffic data to justify the move.
+
+[Step 8: Model Migration →](08-model-selection.md)

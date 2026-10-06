@@ -10,23 +10,23 @@
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="03-agentic-pipeline.md" class="dt-trail-step inactive">Step 3: Pipeline</a>
+    <a href="03-guardrails.md" class="dt-trail-step inactive">Step 3: Guardrails</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="04-agentic-loop.md" class="dt-trail-step inactive">Step 4: Loop</a>
+    <a href="04-agentic-pipeline.md" class="dt-trail-step inactive">Step 4: Pipeline</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="05-streaming.md" class="dt-trail-step inactive">Step 5: Streaming</a>
+    <a href="05-agentic-loop.md" class="dt-trail-step inactive">Step 5: Loop</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="06-rag.md" class="dt-trail-step inactive">Step 6: RAG</a>
+    <a href="06-streaming.md" class="dt-trail-step inactive">Step 6: Streaming</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="07-guardrails.md" class="dt-trail-step inactive">Step 7: Guardrails</a>
+    <a href="07-rag.md" class="dt-trail-step inactive">Step 7: RAG</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
@@ -282,12 +282,12 @@ You should see two rows with a plain token count — one for `input` and one for
 
 ## What we're still missing
 
-This is great for a single call, but real applications make many AI calls, sometimes in sequence, sometimes in parallel. We can't easily see the relationship between calls or understand the overall operation.
+You can now see every call your application makes. But visibility alone doesn't stop a user from making the model do something it shouldn't — that's a safety concern, not an observability one, and it exists from the very first call this app makes.
 
-In [Step 3](03-agentic-pipeline.md), we build a multi-agent pipeline where multiple AI calls form a single business operation, and we observe them all together in one trace.
+In [Step 3](03-guardrails.md), before we grow the app into more complex call patterns, we add an AWS Bedrock Guardrail and instrument it so blocked requests are just as visible as successful ones.
 
 <div id="dt-quiz-anchor"></div>
 
 ## Next step
 
-[Step 3: Agentic Pipeline →](03-agentic-pipeline.md)
+[Step 3: Guardrails →](03-guardrails.md)

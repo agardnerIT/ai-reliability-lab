@@ -3,7 +3,17 @@ FROM python:3.12-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
+
+# Install the AWS CLI (uses ~/.aws/credentials, mounted in via devcontainer.json).
+RUN curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o /tmp/awscliv2.zip \
+    && unzip -q /tmp/awscliv2.zip -d /tmp \
+    && /tmp/aws/install \
+    && rm -rf /tmp/awscliv2.zip /tmp/aws
+
+# The container has no `less`, which the AWS CLI pipes output through by default.
+ENV AWS_PAGER=""
 
 # Install dtctl for running DQL queries from the terminal.
 # https://github.com/dynatrace-oss/dtctl

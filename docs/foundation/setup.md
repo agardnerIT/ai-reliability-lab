@@ -16,11 +16,11 @@ Collect these before starting Step 2.
 
 ### AWS credentials
 
-The tutorial code calls AWS Bedrock Mantle, so you need AWS credentials with permission to invoke Bedrock models.
+The tutorial code calls AWS Bedrock — most steps through the Bedrock Mantle (OpenAI-compatible) endpoint, Step 3 (Guardrails) through the native `bedrock-runtime` endpoint — so you need AWS credentials with permission to invoke Bedrock models and guardrails.
 
 #### Required IAM permissions
 
-Whichever credential type you use, the IAM identity needs the following policy. The `bedrock:InvokeModel` action covers standard calls; `InvokeModelWithResponseStream` covers the streaming exercises.
+Whichever credential type you use, the IAM identity needs the following policy.
 
 ```json
 {
@@ -39,10 +39,27 @@ Whichever credential type you use, the IAM identity needs the following policy. 
         "bedrock-mantle:CreateInference"
       ],
       "Resource": "arn:aws:bedrock-mantle:us-east-2:*:project/default"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:InvokeModel"
+      ],
+      "Resource": "arn:aws:bedrock:us-east-2::foundation-model/openai.gpt-oss-120b-1:0"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "bedrock:GetGuardrail",
+        "bedrock:ApplyGuardrail"
+      ],
+      "Resource": "arn:aws:bedrock:us-east-2:*:guardrail/*"
     }
   ]
 }
 ```
+
+Most steps call the model through the `bedrock-mantle` endpoint — that is what the first two statements cover. **Step 3 (Guardrails) is the exception.** AWS Bedrock Guardrails do not work through `bedrock-mantle` — the OpenAI compatibility layer has no parameter for attaching a guardrail. Step 3 calls the native `bedrock-runtime` `converse` API instead, which needs `bedrock:InvokeModel` to run the model plus `bedrock:GetGuardrail` and `bedrock:ApplyGuardrail` to attach and evaluate the guardrail. The third and fourth statements grant that.
 
 #### Option A: IAM Identity Center (recommended)
 
@@ -69,6 +86,57 @@ You'll have an `AWS_ACCESS_KEY_ID` (starts with `AKIA`) and `AWS_SECRET_ACCESS_K
 
 !!! warning "Access keys don't expire"
     Delete this user and its keys when you're done with the lab. Never commit them to git.
+
+### AWS Bedrock Guardrail
+
+Step 3 of the tutorial needs a guardrail already set up in your AWS account, so create it now. This takes about five minutes.
+
+**1. Open the AWS Console**
+
+Go to [console.aws.amazon.com](https://console.aws.amazon.com) and sign in. In the search bar at the top of the page, type **Bedrock** and click the result that says "Amazon Bedrock".
+
+**2. Find Guardrails in the left-hand menu**
+
+In the left navigation panel, scroll down until you see **Guardrails**. Click it. If you do not see the left panel, click the hamburger menu icon (three horizontal lines) in the top-left corner to open it.
+
+**3. Create a new guardrail**
+
+Click the orange **Create guardrail** button. You will be taken through a multi-step form.
+
+- **Name**: Give it any name, for example `support-bot-guardrail`.
+- **Blocked messaging**: This is the text your application will receive when a request is blocked. Set it to something like: `I can only answer questions about AnyCloud services.`
+
+Click **Next**.
+
+**4. Add a denied topic**
+
+On the "Configure content filters" page, scroll down to **Denied topics**. This is where you tell the guardrail what kinds of requests to block.
+
+Click **Add denied topic** and fill in:
+
+- **Name**: `off-topic-tasks`
+- **Definition**: `Requests that ask the model to do something other than answer questions about AnyCloud services, such as writing code, telling stories, or generating content unrelated to the company.`
+- **Sample phrases**: Add a few examples to help Bedrock understand the pattern:
+    - `write me a tic-tac-toe game in Python`
+    - `tell me a poem about cats`
+    - `generate a recipe for pasta`
+
+Click **Add denied topic**, then **Next**.
+
+**5. Skip the remaining steps**
+
+Click **Next** through the remaining pages (word filters, sensitive information, grounding) without adding anything. These are useful but not needed for this demo.
+
+**6. Review and create**
+
+On the final review page, click **Create guardrail**. AWS will create it and take you to the guardrail's detail page.
+
+**7. Find your guardrail ID**
+
+On the detail page, you will see a field called **Guardrail ID**. It looks something like `abc123def456`. Copy this value — you'll set it as `GUARDRAIL_ID` in Step 2.
+
+!!! note "Guardrails are region-specific"
+    We've used `us-east-2` so far in these tutorials. A guardrail created in `us-east-1` cannot be used with a model endpoint in `us-east-2`. Make sure the region where you created the guardrail matches the `AWS_REGION` environment variable you have set for the app.
 
 ### Dynatrace API token
 
@@ -117,7 +185,7 @@ Two external services are involved:
 - **AWS Bedrock** — the AI model API your exercise code calls
 - **Dynatrace** — receives and stores all traces, metrics, and logs; `dtctl` queries it directly
 
-This is why you need **four credentials** in Step 1: two for AWS (to call Bedrock), two for Dynatrace (one to push telemetry, one to query it).
+This is why you need **five values** from Step 1: two AWS credentials plus a guardrail ID (to call Bedrock and enforce guardrails), and two Dynatrace tokens (one to push telemetry, one to query it).
 
 ---
 
@@ -151,7 +219,10 @@ Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) and [
     AWS_SECRET_ACCESS_KEY=...
     AWS_SESSION_TOKEN=...
     AWS_REGION=us-east-2
+    GUARDRAIL_ID=abc123def456
     ```
+
+    `GUARDRAIL_ID` is the value you copied when creating the guardrail in Step 1 — it's used by the smoke test and by Step 3 of the tutorial.
 
 4. Open the folder in VS Code and run **Dev Containers: Reopen in Container** from the command palette. Wait for the container to build — the OTel Collector starts and `dtctl` is configured automatically.
 
@@ -163,11 +234,11 @@ Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) and [
 python code/smoke-test.py
 ```
 
-The script runs **two checks** and exits non-zero if either fails.
+The script runs **three checks** and exits non-zero if any fails.
 
-**Check 1** confirms that your exercise code can reach the OTel Collector and that telemetry is accepted. **Check 2** confirms that your AWS credentials are valid and that the Bedrock model responds.
+**Check 1** confirms that your exercise code can reach the OTel Collector and that telemetry is accepted. **Check 2** confirms that your AWS credentials are valid and that the Bedrock model responds through the Mantle endpoint used by most steps. **Check 3** confirms that your credentials also work against the native `bedrock-runtime` endpoint and that your `GUARDRAIL_ID` resolves and applies correctly — this is what Step 3 (Guardrails) needs.
 
-Expected output when both pass:
+Expected output when all three pass:
 
 ```
 ============================================================
@@ -178,18 +249,25 @@ Check 1: OTel Collector pipeline
 [OK] OTel Collector pipeline: telemetry accepted by collector
 
 ============================================================
-Check 2: AWS Bedrock connection
+Check 2: AWS Bedrock connection (Mantle)
   Model replied:   'OK'
 [OK] AWS Bedrock connection: model reachable and responding
 
 ============================================================
-Both checks passed. Wait ~60 s then verify data reached Dynatrace:
+Check 3: AWS Bedrock Guardrail (native bedrock-runtime)
+  Guardrail applied, stop_reason: end_turn
+[OK] AWS Bedrock Guardrail: native endpoint and guardrail both working
+
+============================================================
+All checks passed. Wait ~60 s then verify data reached Dynatrace:
   ...
 ```
 
 If Check 1 fails with a connection error, the OTel Collector is not reachable on port 4318 — re-check Step 2.4 and confirm the container built successfully.
 
-If Check 2 fails, follow the error message: either your AWS credentials are not set (`AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION`), or the IAM identity lacks `bedrock:InvokeModel` permission.
+If Check 2 fails, follow the error message: either your AWS credentials are not set (`AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION`), or the IAM identity lacks the `bedrock-mantle:CallWithBearerToken` and `bedrock-mantle:CreateInference` permissions from the policy above.
+
+If Check 3 fails, follow the error message: either `GUARDRAIL_ID` is not set (see Step 2.3), the guardrail doesn't exist in `AWS_REGION`, or the IAM identity lacks `bedrock:InvokeModel`, `bedrock:GetGuardrail`, or `bedrock:ApplyGuardrail` from the policy above.
 
 Wait about **60 seconds**, then run:
 

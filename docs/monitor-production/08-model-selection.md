@@ -10,23 +10,23 @@
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="03-agentic-pipeline.md" class="dt-trail-step inactive">Step 3: Pipeline</a>
+    <a href="03-guardrails.md" class="dt-trail-step inactive">Step 3: Guardrails</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="04-agentic-loop.md" class="dt-trail-step inactive">Step 4: Loop</a>
+    <a href="04-agentic-pipeline.md" class="dt-trail-step inactive">Step 4: Pipeline</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="05-streaming.md" class="dt-trail-step inactive">Step 5: Streaming</a>
+    <a href="05-agentic-loop.md" class="dt-trail-step inactive">Step 5: Loop</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="06-rag.md" class="dt-trail-step inactive">Step 6: RAG</a>
+    <a href="06-streaming.md" class="dt-trail-step inactive">Step 6: Streaming</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="07-guardrails.md" class="dt-trail-step inactive">Step 7: Guardrails</a>
+    <a href="07-rag.md" class="dt-trail-step inactive">Step 7: RAG</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
@@ -56,7 +56,7 @@ At each phase, Dynatrace gives you the comparison. You are not guessing: you hav
 ## Running it
 
 ```bash
-cd code/monitor-production/step7-model-selection
+cd code/monitor-production/step8-model-selection
 
 export AWS_REGION=us-east-2
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
@@ -71,7 +71,7 @@ No separate flag server to start. The app uses the official `openfeature-provide
 
 `flags.json` is the single place where the migration is controlled:
 
-```json title="step7-model-selection/flags.json"
+```json title="step8-model-selection/flags.json"
 {
   "$schema": "https://flagd.dev/schema/v0/flags.json",
   "flags": {
@@ -128,7 +128,7 @@ The urgency score determines whether the complaint is even eligible for the chal
 
 ## The routing code
 
-```python title="step7-model-selection/app-instrumented.py"
+```python title="step8-model-selection/app-instrumented.py"
 urgency = _get_urgency(message)
 ctx     = EvaluationContext(targeting_key=cid, attributes={"urgency": urgency})
 details = flag_client.get_string_details("active-model", MODEL_CONTROL, ctx)
@@ -272,7 +272,7 @@ This is the report you take to the meeting: cost, latency, and response quality,
 
 | | What's new |
 |---|---|
-| **Step 1–7** | Observability on a fixed model, including guardrail monitoring |
+| **Step 1–7** | Observability on a fixed model — single calls, guardrails, pipelines, loops, streaming, and RAG |
 | **Step 8** | Feature-flag-controlled model routing + comparison metrics |
 
 The instrumentation pattern is the same as all previous steps. What changes is that `gen_ai.request.model` now varies across traces, and `feature_flag.*` attributes tell you why. Everything else carries forward unchanged: spans, histograms, OTel semantic conventions.

@@ -6,3 +6,4 @@ include
 pyvenv.cfg
 *.DS_Store*
 site
+__pycache__

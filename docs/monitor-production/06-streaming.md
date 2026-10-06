@@ -1,4 +1,4 @@
-# Step 5: Streaming
+# Step 6: Streaming
 
 <div class="dt-trail">
   <div class="dt-trail-item">
@@ -10,23 +10,23 @@
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="03-agentic-pipeline.md" class="dt-trail-step inactive">Step 3: Pipeline</a>
+    <a href="03-guardrails.md" class="dt-trail-step inactive">Step 3: Guardrails</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="04-agentic-loop.md" class="dt-trail-step inactive">Step 4: Loop</a>
+    <a href="04-agentic-pipeline.md" class="dt-trail-step inactive">Step 4: Pipeline</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <span class="dt-trail-step">Step 5: Streaming</span>
+    <a href="05-agentic-loop.md" class="dt-trail-step inactive">Step 5: Loop</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="06-rag.md" class="dt-trail-step inactive">Step 6: RAG</a>
+    <span class="dt-trail-step">Step 6: Streaming</span>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="07-guardrails.md" class="dt-trail-step inactive">Step 7: Guardrails</a>
+    <a href="07-rag.md" class="dt-trail-step inactive">Step 7: RAG</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
@@ -41,7 +41,7 @@ This changes the instrumentation pattern in three important ways.
 ## Running it
 
 ```bash
-cd code/monitor-production/step5-streaming
+cd code/monitor-production/step6-streaming
 
 export AWS_REGION=us-east-2
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
@@ -212,10 +212,10 @@ So far, every example has given the model everything it needs directly in the pr
 
 RAG (Retrieval-Augmented Generation) solves this. Instead of stuffing the whole document into the prompt, you search it first and pass only the relevant sections to the model. Your knowledge base can be thousands of pages and the model never has to see more than a handful at a time.
 
-In [Step 6](06-rag.md), we add a retrieval step to the trace. A vector search runs before the LLM call, and the results feed directly into the prompt. This introduces a new span type, a new metric, and a new question you can answer from your traces: what context did the model actually see?
+In [Step 7](07-rag.md), we add a retrieval step to the trace. A vector search runs before the LLM call, and the results feed directly into the prompt. This introduces a new span type, a new metric, and a new question you can answer from your traces: what context did the model actually see?
 
 <div id="dt-quiz-anchor"></div>
 
 ## Next step
 
-[Step 6: RAG →](06-rag.md)
+[Step 7: RAG →](07-rag.md)

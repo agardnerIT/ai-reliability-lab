@@ -87,11 +87,11 @@ nav:
     - monitor-production/index.md
     - "Step 1: Your First AI Call": monitor-production/01-single-call.md
     - "Step 2: Adding Observability": monitor-production/02-add-observability.md
-    - "Step 3: Agentic Pipeline": monitor-production/03-agentic-pipeline.md
-    - "Step 4: Agentic Loop": monitor-production/04-agentic-loop.md
-    - "Step 5: Streaming": monitor-production/05-streaming.md
-    - "Step 6: RAG": monitor-production/06-rag.md
-    - "Step 7: Guardrails": monitor-production/07-guardrails.md
+    - "Step 3: Guardrails": monitor-production/03-guardrails.md
+    - "Step 4: Agentic Pipeline": monitor-production/04-agentic-pipeline.md
+    - "Step 5: Agentic Loop": monitor-production/05-agentic-loop.md
+    - "Step 6: Streaming": monitor-production/06-streaming.md
+    - "Step 7: RAG": monitor-production/07-rag.md
     - "Step 8: Model Migration": monitor-production/08-model-selection.md
   - Monitor AI in Development:
     - monitor-development/index.md

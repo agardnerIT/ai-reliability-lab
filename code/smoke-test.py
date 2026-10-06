@@ -1,10 +1,11 @@
 """
-Smoke test — verifies both critical connections before any lab exercise:
+Smoke test — verifies the critical connections before any lab exercise:
 
-  1. Code → OTel Collector → Dynatrace  (traces + metrics pipeline)
-  2. Code → AWS Bedrock                 (AI model API)
+  1. Code → OTel Collector → Dynatrace       (traces + metrics pipeline)
+  2. Code → AWS Bedrock (Mantle endpoint)    (AI model API used by most steps)
+  3. Code → AWS Bedrock (native endpoint)    (guardrails, used by Step 3)
 
-If either check fails the script exits non-zero with a clear error message.
+If any check fails the script exits non-zero with a clear error message.
 Fix the reported credential or connectivity issue before starting exercises.
 
 No exercise-specific logic here — this is purely a go/no-go gate.
@@ -17,6 +18,7 @@ http://localhost:4318 if unset.
 """
 
 import os
+import pathlib
 import sys
 import time
 
@@ -28,6 +30,22 @@ from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+# docker-compose's env_file only loads .devcontainer/.env once, at container
+# start — editing it afterward has no effect until the container restarts.
+# Fill in any variable still missing from the environment directly from the
+# file, so a freshly added value (e.g. GUARDRAIL_ID) works without a restart.
+# Real environment variables always win; this only fills gaps.
+_env_path = pathlib.Path(__file__).resolve().parent.parent / ".devcontainer" / ".env"
+if _env_path.exists():
+    for _line in _env_path.read_text().splitlines():
+        _line = _line.strip()
+        if not _line or _line.startswith("#") or "=" not in _line:
+            continue
+        _key, _, _value = _line.partition("=")
+        _key, _value = _key.strip(), _value.strip().strip('"').strip("'")
+        if _value and _key not in os.environ:
+            os.environ[_key] = _value
 
 ENDPOINT = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4318")
 SERVICE  = "otel-smoke-test"
@@ -91,7 +109,7 @@ print("[OK] OTel Collector pipeline: telemetry accepted by collector")
 # ---------------------------------------------------------------------------
 print()
 print("=" * 60)
-print("Check 2: AWS Bedrock connection")
+print("Check 2: AWS Bedrock connection (Mantle)")
 
 try:
     from openai import OpenAI
@@ -131,11 +149,54 @@ except Exception as exc:
     sys.exit(1)
 
 # ---------------------------------------------------------------------------
+# Check 3: AWS Bedrock Guardrail (native bedrock-runtime endpoint)
+# ---------------------------------------------------------------------------
+print()
+print("=" * 60)
+print("Check 3: AWS Bedrock Guardrail (native bedrock-runtime)")
+
+GUARDRAIL_ID = os.environ.get("GUARDRAIL_ID")
+if not GUARDRAIL_ID:
+    print("\n[FAIL] GUARDRAIL_ID is not set.", file=sys.stderr)
+    print("       Create a guardrail (Foundation > Setup > AWS Bedrock Guardrail)", file=sys.stderr)
+    print("       and export GUARDRAIL_ID with the ID from the console.", file=sys.stderr)
+    sys.exit(1)
+
+try:
+    import boto3
+except ImportError as exc:
+    print(f"\n[FAIL] Missing dependency: {exc}", file=sys.stderr)
+    print("       Run: pip install -r requirements.txt", file=sys.stderr)
+    sys.exit(1)
+
+try:
+    bedrock_runtime = boto3.client(
+        "bedrock-runtime", region_name=os.environ.get("AWS_REGION", "us-east-2")
+    )
+    response = bedrock_runtime.converse(
+        modelId="openai.gpt-oss-120b-1:0",
+        messages=[{"role": "user", "content": [{"text": "Reply with the single word OK."}]}],
+        guardrailConfig={
+            "guardrailIdentifier": GUARDRAIL_ID,
+            "guardrailVersion": "DRAFT",
+        },
+    )
+    stop_reason = response["stopReason"]
+    print(f"  Guardrail applied, stop_reason: {stop_reason!r}")
+    print("[OK] AWS Bedrock Guardrail: native endpoint and guardrail both working")
+except Exception as exc:
+    print(f"\n[FAIL] Bedrock guardrail check failed: {exc}", file=sys.stderr)
+    print("       Check that GUARDRAIL_ID is correct and exists in AWS_REGION,", file=sys.stderr)
+    print("       and that your IAM policy includes bedrock:InvokeModel,", file=sys.stderr)
+    print("       bedrock:GetGuardrail, and bedrock:ApplyGuardrail.", file=sys.stderr)
+    sys.exit(1)
+
+# ---------------------------------------------------------------------------
 # All checks passed
 # ---------------------------------------------------------------------------
 print()
 print("=" * 60)
-print("Both checks passed. Wait ~60 s then verify data reached Dynatrace:")
+print("All checks passed. Wait ~60 s then verify data reached Dynatrace:")
 print()
 print('  Spans:   dtctl query \'fetch spans | filter service.name == "otel-smoke-test" | fields startTime, span.name, duration, service.name | sort startTime desc | limit 5\'')
 print('  Metrics: dtctl query \'timeseries runs = sum(smoke_test.runs), by: {service.name} | filter service.name == "otel-smoke-test" | fieldsAdd total_runs = arraySum(runs) | fields service.name, total_runs\'')

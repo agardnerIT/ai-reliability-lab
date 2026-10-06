@@ -28,29 +28,42 @@ We chose this because it's realistic: most production AI apps involve more than 
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="03-agentic-pipeline/" class="dt-trail-step">Step 3: Pipeline</a>
+    <a href="03-guardrails/" class="dt-trail-step">Step 3: Guardrails</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="04-agentic-loop/" class="dt-trail-step">Step 4: Loop</a>
+    <a href="04-agentic-pipeline/" class="dt-trail-step">Step 4: Pipeline</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="05-streaming/" class="dt-trail-step">Step 5: Streaming</a>
+    <a href="05-agentic-loop/" class="dt-trail-step">Step 5: Loop</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="06-rag/" class="dt-trail-step">Step 6: RAG</a>
+    <a href="06-streaming/" class="dt-trail-step">Step 6: Streaming</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="07-guardrails/" class="dt-trail-step">Step 7: Guardrails</a>
+    <a href="07-rag/" class="dt-trail-step">Step 7: RAG</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
     <a href="08-model-selection/" class="dt-trail-step">Step 8: Model Migration</a>
   </div>
 </div>
+
+## Steps at a glance
+
+| # | Step | What you build | Key observability |
+|---|------|---------------|-------------------|
+| 1 | [First Call](01-single-call.md) | A single AI call with no instrumentation | None |
+| 2 | [Add OTel](02-add-observability.md) | The same call, fully instrumented | 1 span, token histogram |
+| 3 | [Guardrails](03-guardrails.md) | AWS Bedrock Guardrail blocking prompt injection | Guardrail block attribute + counter metric |
+| 4 | [Pipeline](04-agentic-pipeline.md) | A fixed three-agent pipeline | Predictable nested spans |
+| 5 | [Loop](05-agentic-loop.md) | A model-driven agentic loop | Variable nested spans |
+| 6 | [Streaming](06-streaming.md) | Streaming response with time-to-first-chunk | 1 span, time-to-first-chunk metric |
+| 7 | [RAG](07-rag.md) | Retrieval-augmented generation | retrieval + chat spans, chunk count metric |
+| 8 | [Model Migration](08-model-selection.md) | Feature-flag-controlled A/B model routing | Per-model comparison metrics |
 
 ## Before you start
 
