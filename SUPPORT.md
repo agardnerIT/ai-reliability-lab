@@ -5,9 +5,7 @@
 Describe how this repository is supported.
 
 Examples:
-- Community-supported by maintainers on a best-effort basis
-- Maintained by the owning team for internal or strategic use
-- Experimental project with limited support
+- Maintained by DevRel team at Dynatrace. Not supported via official support ticket / channels.
 
 ## How to get help
 

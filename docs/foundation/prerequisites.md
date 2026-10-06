@@ -32,7 +32,7 @@ Confirm every item below **before the lab starts**. Several items (AWS access, D
 
 The lab runs in two containers started with Docker Compose, so you need a runtime that provides both `docker` and `docker compose`.
 
-- **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** is the simplest option, but it requires a paid licence for many organisations. Dynatrace employees can't use it.
+- **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** is the simplest option, but it requires a paid licence for many organisations.
 - **[Rancher Desktop](https://rancherdesktop.io/)** is a free alternative. In its settings, choose the **dockerd (moby)** container engine, not containerd. The dev container uses the `docker` and `docker compose` commands, which only the dockerd engine provides.
 - Any other runtime works if it provides working `docker` and `docker compose` commands (for example Colima, or Docker Engine on Linux).
 
