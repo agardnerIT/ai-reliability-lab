@@ -97,11 +97,6 @@ nav:
     - "Step 8: Model Migration": monitor-production/08-model-selection.md
   - Monitor AI in Development:
     - monitor-development/index.md
-    - monitor-development/01-invisible-cost.md
-    - "Step 2: Bedrock Telemetry": monitor-development/02-first-dev-span.md
-    - "Step 3: Harness Hooks": monitor-development/03-claude-code-hook.md
-    - "Step 4: Enterprise Push": monitor-development/04-team-proxy.md
-    - "Step 5: AI Gateway": monitor-development/05-cost-attribution.md
   - Badges: badges.md
 
 extra:

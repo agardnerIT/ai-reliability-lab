@@ -281,4 +281,4 @@ The instrumentation pattern is the same as all previous steps. What changes is t
 
 ## What's next?
 
-That's the last step in the Monitor Production track. Head back to the [Monitor Production AI](index.md) overview, or continue with [Monitor AI in Development](../monitor-development/index.md).
+That's the last step in the Monitor Production track. Head back to the [Monitor Production AI](index.md) overview.

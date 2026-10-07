@@ -297,4 +297,4 @@ dtctl query 'timeseries runs = sum(smoke_test.runs), by: {service.name}
 ## Choose your path
 
 - **[Monitor Production AI](../monitor-production/index.md)** — Add observability to a running AI application, step by step
-- **[Monitor AI in Development](../monitor-development/index.md)** — Observe AI tool usage across your development team
+- **[Monitor AI in Development](../monitor-development/index.md)** — Coming soon
