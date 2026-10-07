@@ -24,7 +24,7 @@ Confirm every item below **before the lab starts**. Several items (AWS access, D
 
 ### Dynatrace
 
-- [ ] **A Dynatrace environment** you can sign in to. Note your tenant ID (the `abc12345` in `https://abc12345.live.dynatrace.com`).
+- [ ] **A Dynatrace environment** you can sign in to. Note your tenant ID (the `abc12345` in `https://abc12345.apps.dynatrace.com`).
 - [ ] **Permission to create an access token** with the `openTelemetryTrace.ingest` and `metrics.ingest` scopes.
 - [ ] **Permission to create a platform token** with the `storage:metrics:read`, `storage:spans:read` and `storage:buckets:read` scopes.
 
