@@ -128,7 +128,7 @@ client = OpenAI(
 # Urgency scoring — always uses the control model; result gates flag routing
 # ---------------------------------------------------------------------------
 def _get_urgency(message: str) -> int:
-    system_prompt = (HERE.parent / "agentic-pipeline" / ".agents" / "sentiment.md").read_text()
+    system_prompt = (HERE.parent / "step4-agentic-pipeline" / ".agents" / "sentiment.md").read_text()
     with tracer.start_as_current_span("invoke_agent sentiment") as agent_span:
         agent_span.set_attribute("gen_ai.operation.name", "invoke_agent")
         agent_span.set_attribute("gen_ai.agent.name",     "sentiment")

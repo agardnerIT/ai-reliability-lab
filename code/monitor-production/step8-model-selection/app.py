@@ -69,7 +69,7 @@ client = OpenAI(
 # Urgency scoring — result gates flag routing
 # ---------------------------------------------------------------------------
 def _get_urgency(message: str) -> int:
-    system_prompt = (HERE.parent / "agentic-pipeline" / ".agents" / "sentiment.md").read_text()
+    system_prompt = (HERE.parent / "step4-agentic-pipeline" / ".agents" / "sentiment.md").read_text()
     response = client.chat.completions.create(
         model=MODEL_CONTROL,
         messages=[

@@ -18,5 +18,485 @@
     "id": "C004",
     "customer": "Dave",
     "message": "I have been waiting three weeks for a response to my previous complaint. Nobody has called me back. I am contacting my solicitor if I do not hear back today."
+  },
+  {
+    "id": "C005",
+    "customer": "Amy",
+    "message": "My loyalty points haven't shown up yet for last week's order. Could you check when you have a moment?"
+  },
+  {
+    "id": "C006",
+    "customer": "Noel",
+    "message": "The parcel came damaged and the replacement you sent was also scratched. I'd like this resolved properly."
+  },
+  {
+    "id": "C007",
+    "customer": "Sam",
+    "message": "My order arrived a day early, which was a nice surprise, but I was out and had to collect it from the depot."
+  },
+  {
+    "id": "C008",
+    "customer": "Tara",
+    "message": "The returns portal was a bit confusing. I got there in the end. Could the steps be clearer?"
+  },
+  {
+    "id": "C009",
+    "customer": "Oscar",
+    "message": "My discount code did not apply at checkout the first time. It worked on the second attempt. Might be worth a look."
+  },
+  {
+    "id": "C010",
+    "customer": "Xena",
+    "message": "I have reported this to my bank as fraud because you ignored my cancellation. My lawyer will be in touch."
+  },
+  {
+    "id": "C011",
+    "customer": "Pam",
+    "message": "The product works well, but the box was dented on one corner."
+  },
+  {
+    "id": "C012",
+    "customer": "Uma",
+    "message": "I would have liked a text message when the parcel was out for delivery."
+  },
+  {
+    "id": "C013",
+    "customer": "Walt",
+    "message": "Your product caused damage to my property. I am speaking to a solicitor about this and expect a response within 48 hours."
+  },
+  {
+    "id": "C014",
+    "customer": "Ella",
+    "message": "My parcel was delivered to a neighbour. They handed it over and no harm was done, but a notification would have been nice."
+  },
+  {
+    "id": "C015",
+    "customer": "Rita",
+    "message": "Your delivery service lost my parcel and then blamed me. I'm furious and I will be writing reviews and telling everyone I know."
+  },
+  {
+    "id": "C016",
+    "customer": "Tess",
+    "message": "Absolutely appalling service. My order was cancelled without notice and I want compensation. I'll be reporting this publicly."
+  },
+  {
+    "id": "C017",
+    "customer": "Jack",
+    "message": "I have been trying to reach someone about my return for days. Please can someone get back to me soon."
+  },
+  {
+    "id": "C018",
+    "customer": "Mia",
+    "message": "Is it possible to choose a delivery slot in future? I missed the courier this time but rebooked easily."
+  },
+  {
+    "id": "C019",
+    "customer": "Erin",
+    "message": "Quick note: my parcel arrived a few hours after the estimated window. Everything is fine, just letting you know."
+  },
+  {
+    "id": "C020",
+    "customer": "Zane",
+    "message": "The size guide on the site is hard to read on mobile. I ordered the right size in the end."
+  },
+  {
+    "id": "C021",
+    "customer": "Xavier",
+    "message": "The item is fine, but the colour on screen looked lighter than it is in person. You might want to update the photos."
+  },
+  {
+    "id": "C022",
+    "customer": "Quinn",
+    "message": "Please could you send my receipt as a PDF? The emailed link has expired."
+  },
+  {
+    "id": "C023",
+    "customer": "Chloe",
+    "message": "I received the satisfaction survey twice for the same order. Not a problem, just a heads-up."
+  },
+  {
+    "id": "C024",
+    "customer": "Pete",
+    "message": "I've been overcharged and nobody will help me. If this isn't fixed I will dispute the charge with my card provider and post about it everywhere."
+  },
+  {
+    "id": "C025",
+    "customer": "Yuri",
+    "message": "This is my final warning. I'm contacting trading standards and my solicitor about your refusal to refund a faulty item."
+  },
+  {
+    "id": "C026",
+    "customer": "Gina",
+    "message": "This is the second email I've sent about my missing accessory. I need it sent out this week please, as I'm travelling."
+  },
+  {
+    "id": "C027",
+    "customer": "Olga",
+    "message": "This is unacceptable. My order has arrived broken for the third time and I will be leaving a one-star review unless I get a full refund today."
+  },
+  {
+    "id": "C028",
+    "customer": "Wendy",
+    "message": "Thanks for the quick delivery. One thing: the thank-you card inside had the wrong name on it."
+  },
+  {
+    "id": "C029",
+    "customer": "Frank",
+    "message": "The packaging was a bit bigger than it needed to be. The product itself is great though."
+  },
+  {
+    "id": "C030",
+    "customer": "Iris",
+    "message": "I paid for express delivery but the parcel took six days. I would like the delivery fee refunded."
+  },
+  {
+    "id": "C031",
+    "customer": "Vic",
+    "message": "The mug I ordered has a tiny chip on the handle. It's usable so there's no rush, but maybe let your packers know."
+  },
+  {
+    "id": "C032",
+    "customer": "Hugo",
+    "message": "The item stopped working after two weeks. I'd like a replacement or a refund. It's quite frustrating."
+  },
+  {
+    "id": "C033",
+    "customer": "Liam",
+    "message": "The driver left the parcel at the side gate instead of the front door. It was fine, but a note would have helped."
+  },
+  {
+    "id": "C034",
+    "customer": "Leo",
+    "message": "My refund was promised in five working days and it's now day nine. Please sort this out today."
+  },
+  {
+    "id": "C035",
+    "customer": "Stan",
+    "message": "I'm completely fed up. Wrong item again, and I want a refund immediately or I'm taking this to the review sites."
+  },
+  {
+    "id": "C036",
+    "customer": "Finn",
+    "message": "Could you make the unsubscribe link easier to find in your emails? I found it eventually."
+  },
+  {
+    "id": "C037",
+    "customer": "Judy",
+    "message": "I received two copies of the same order confirmation email. No problem, just thought you should know."
+  },
+  {
+    "id": "C038",
+    "customer": "Grace",
+    "message": "Could you add the tracking link to the dispatch email? I had to log in to find it."
+  },
+  {
+    "id": "C039",
+    "customer": "Rosa",
+    "message": "I ordered a medium and it fits fine, but the label says large. Just a labelling mix-up I think."
+  },
+  {
+    "id": "C040",
+    "customer": "Kara",
+    "message": "Two of the four items I ordered are missing from the box. I need them sent promptly, I'm quite annoyed."
+  },
+  {
+    "id": "C041",
+    "customer": "Vera",
+    "message": "I have been charged twice and my bank has told me to dispute it. If it isn't refunded by tomorrow I'm raising a chargeback and contacting a solicitor."
+  },
+  {
+    "id": "C042",
+    "customer": "Ben",
+    "message": "My package arrived with a torn outer wrapper, but the item inside is undamaged."
+  },
+  {
+    "id": "C043",
+    "customer": "Karl",
+    "message": "One of the items in my order is a slightly different shade from the website photo. Not a big deal but I wanted to mention it."
+  },
+  {
+    "id": "C044",
+    "customer": "Maya",
+    "message": "The wrong item arrived, and when I called I was told someone would ring me back. Nobody has. Please fix this soon."
+  },
+  {
+    "id": "C045",
+    "customer": "Ivan",
+    "message": "The instruction leaflet was missing from the box. Is there a PDF I can download?"
+  },
+  {
+    "id": "C046",
+    "customer": "Heidi",
+    "message": "My invoice shows my old address. Could you update it when you get a chance? The order arrived at the right place."
+  },
+  {
+    "id": "C047",
+    "customer": "Uri",
+    "message": "I demand a refund today. This is the fourth time something has gone wrong and I'm done being polite. I'll leave honest reviews."
+  },
+  {
+    "id": "C048",
+    "customer": "Dan",
+    "message": "The phone number on my receipt looks like it has a typo. I found the right one online."
+  },
+  {
+    "id": "C049",
+    "customer": "Nina",
+    "message": "The website said in stock but my item took an extra two days to ship. It would be good if the estimate was more accurate."
+  },
+  {
+    "id": "C050",
+    "customer": "Yara",
+    "message": "Delivery took five days instead of the three quoted. It arrived fine, just a bit slower than expected."
+  },
+  {
+    "id": "C051",
+    "customer": "Jonas",
+    "message": "The return label you emailed printed a bit faint. The courier still scanned it."
+  },
+  {
+    "id": "C052",
+    "customer": "Viktor",
+    "message": "The font in the order confirmation email is very small. A slightly larger size would help."
+  },
+  {
+    "id": "C053",
+    "customer": "Ines",
+    "message": "My package was left in the recycling bin outside. I found it, but a safer spot might be better."
+  },
+  {
+    "id": "C054",
+    "customer": "Greta",
+    "message": "I tried your live chat this morning and it was closed. The email reply came back quickly, so no problem."
+  },
+  {
+    "id": "C055",
+    "customer": "Dana",
+    "message": "The item I received was clearly used, with fingerprints and dust inside the box. I expect better and want a fresh unit."
+  },
+  {
+    "id": "C056",
+    "customer": "Wade",
+    "message": "I was charged a restocking fee on a return that was your mistake. I'd like it refunded, it's not fair."
+  },
+  {
+    "id": "C057",
+    "customer": "Mateo",
+    "message": "The faulty heater damaged my carpet. My solicitor has advised me to put this in writing and I expect compensation. I'll go to the small claims court if necessary."
+  },
+  {
+    "id": "C058",
+    "customer": "Bruno",
+    "message": "The password reset email took about ten minutes to arrive. It worked fine in the end."
+  },
+  {
+    "id": "C059",
+    "customer": "Zeke",
+    "message": "The replacement filter I ordered fits well. The packaging said fragile on a part that isn't, which worried me for no reason."
+  },
+  {
+    "id": "C060",
+    "customer": "Una",
+    "message": "I'd like to change the name on my warranty registration from my husband's to mine when you have time."
+  },
+  {
+    "id": "C061",
+    "customer": "Zara",
+    "message": "The courier said they attempted delivery but I was home all day. I'm quite annoyed and need the parcel redelivered tomorrow."
+  },
+  {
+    "id": "C062",
+    "customer": "Edith",
+    "message": "My subscription renewal email arrived the same day as the charge. A few days' notice would be friendlier."
+  },
+  {
+    "id": "C063",
+    "customer": "Pavel",
+    "message": "Just flagging that the track my order page showed my parcel as delivered a few hours before it really arrived."
+  },
+  {
+    "id": "C064",
+    "customer": "Marta",
+    "message": "My order was split into two deliveries a day apart. Both arrived fine, but a single parcel would have been neater."
+  },
+  {
+    "id": "C065",
+    "customer": "Idris",
+    "message": "Unacceptable. The charger overheated and scorched my table. I want a full refund immediately or I will be warning others in public reviews."
+  },
+  {
+    "id": "C066",
+    "customer": "Nils",
+    "message": "The survey link in your email doesn't open on my phone. I'll fill it in on my laptop."
+  },
+  {
+    "id": "C067",
+    "customer": "Yvette",
+    "message": "The product description says it ships in 24 hours but mine shipped in 36. It arrived fine, just slightly off."
+  },
+  {
+    "id": "C068",
+    "customer": "Jamila",
+    "message": "You have charged me three times for one order and ignored my emails. I'm furious. Fix this today or I'm disputing it with my card company."
+  },
+  {
+    "id": "C069",
+    "customer": "Silas",
+    "message": "The hinge on the box is stiff, but it works. Maybe worth checking with the supplier."
+  },
+  {
+    "id": "C070",
+    "customer": "Sofia",
+    "message": "The gift wrapping was lovely, but the gift receipt was left out. Could you email me one?"
+  },
+  {
+    "id": "C071",
+    "customer": "Gordon",
+    "message": "I've been waiting a month for my money back and nobody cares. Refund me today or I will dispute the payment and tell everyone about this."
+  },
+  {
+    "id": "C072",
+    "customer": "Hamid",
+    "message": "The price on the shelf label in your store was different from the website. The cashier sorted it straight away."
+  },
+  {
+    "id": "C073",
+    "customer": "Ravi",
+    "message": "My monthly statement lists the charge under a different company name than I expected. It's correct, just confusing at first glance."
+  },
+  {
+    "id": "C074",
+    "customer": "Reya",
+    "message": "I was sent a reminder about an abandoned basket for something I already bought. Slightly annoying, nothing more."
+  },
+  {
+    "id": "C075",
+    "customer": "Yusuf",
+    "message": "I cancelled my subscription last month and I've been charged again. Please refund this and confirm the cancellation."
+  },
+  {
+    "id": "C076",
+    "customer": "Bella",
+    "message": "The coffee machine I bought leaks from the base after three uses. I'm disappointed and would like a replacement."
+  },
+  {
+    "id": "C077",
+    "customer": "Noor",
+    "message": "My bank has already started a chargeback because you refused to answer. If I don't have a refund and an explanation within 24 hours, my solicitor will write to you."
+  },
+  {
+    "id": "C078",
+    "customer": "Opal",
+    "message": "A nice product, but the manual is only in English. A French version would be helpful for my mother."
+  },
+  {
+    "id": "C079",
+    "customer": "Lars",
+    "message": "The colour name sand on the site looks quite different from beige. A swatch would help."
+  },
+  {
+    "id": "C080",
+    "customer": "Farid",
+    "message": "The tote bag I ordered has a loose thread on one strap. It isn't coming apart, just something for quality control."
+  },
+  {
+    "id": "C081",
+    "customer": "Fiona",
+    "message": "This is the worst service I've had. My order has been wrong three times and I want a full refund now, or I'll be posting reviews everywhere."
+  },
+  {
+    "id": "C082",
+    "customer": "Quincy",
+    "message": "The free sample that came with my order was lovely. Could I buy it separately? I couldn't find it on the site."
+  },
+  {
+    "id": "C083",
+    "customer": "Tomas",
+    "message": "Your app logged me out twice this week. Easy to log back in, but I thought you'd want to know."
+  },
+  {
+    "id": "C084",
+    "customer": "Willa",
+    "message": "I was asked to rate my delivery before the parcel had actually arrived. Odd timing, but no problem."
+  },
+  {
+    "id": "C085",
+    "customer": "Abby",
+    "message": "Could you let me know if you will restock the green version? No hurry, I'm happy to wait."
+  },
+  {
+    "id": "C086",
+    "customer": "Kiki",
+    "message": "I think the product page is missing the dimensions in centimetres. I worked it out from the inches."
+  },
+  {
+    "id": "C087",
+    "customer": "Lena",
+    "message": "I've been misled by your support team twice. I want a full refund today, or I'm taking this to the review sites and social media."
+  },
+  {
+    "id": "C088",
+    "customer": "Xander",
+    "message": "The checkout page kept my old billing address pre-filled. I corrected it, so no harm done."
+  },
+  {
+    "id": "C089",
+    "customer": "Hana",
+    "message": "You cancelled my wedding order two days before the date with no warning. I'm livid and I'll be sharing this on every review site I can find."
+  },
+  {
+    "id": "C090",
+    "customer": "Elias",
+    "message": "I was promised a call from a manager and it never came. Please make sure someone contacts me by tomorrow."
+  },
+  {
+    "id": "C091",
+    "customer": "Vivian",
+    "message": "I have now contacted you twice about a faulty zip on my jacket and heard nothing. I'd like a replacement or refund this week."
+  },
+  {
+    "id": "C092",
+    "customer": "Kofi",
+    "message": "I'm done. Late again, damaged again, and a rude person on your phone line. I want a refund and I'll be telling everyone."
+  },
+  {
+    "id": "C093",
+    "customer": "Cleo",
+    "message": "The website offered me a discount on a product I had bought at full price the day before. No complaint, just an observation."
+  },
+  {
+    "id": "C094",
+    "customer": "Dmitri",
+    "message": "Thank you for the speedy delivery. A small thing: the order number on the packing slip had one digit missing."
+  },
+  {
+    "id": "C095",
+    "customer": "Caleb",
+    "message": "I was told my refund would arrive within a week. It's been three and I've had no explanation. Please look into it."
+  },
+  {
+    "id": "C096",
+    "customer": "Ximena",
+    "message": "My replacement arrived with the wrong power adaptor. This is the second time something has been wrong with my order and I'd like it sorted soon."
+  },
+  {
+    "id": "C097",
+    "customer": "Owen",
+    "message": "I have reported your company to trading standards and my lawyer is preparing a letter about the unsafe product you sold me."
+  },
+  {
+    "id": "C098",
+    "customer": "Umar",
+    "message": "I would like a copy of the VAT receipt for my last order. There's no rush."
+  },
+  {
+    "id": "C099",
+    "customer": "Andre",
+    "message": "Your support line kept me on hold for forty minutes and then cut me off. I need a callback today about my order."
+  },
+  {
+    "id": "C100",
+    "customer": "Thea",
+    "message": "The email greeted me with my surname instead of my first name. Easy mistake, just letting you know."
   }
 ]

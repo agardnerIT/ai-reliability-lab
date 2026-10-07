@@ -11,7 +11,7 @@
       "targeting": {
         "if": [
           {"<=": [{"var": "urgency"}, 2]},
-          {"fractional": [["control", 90], ["challenger", 10]]},
+          {"fractional": [["control", 100], ["challenger", 0]]},
           "control"
         ]
       }
