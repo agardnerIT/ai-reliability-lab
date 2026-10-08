@@ -2,7 +2,7 @@
 
 ## Step 0: Fork this repository
 
-**You do not have write access to the source repository.** Fork it into your own GitHub account first — you'll need your own copy to store credentials.
+Fork [this repository](https://github.com/dynatrace-oss/ai-reliability-lab) it into your own GitHub account first.
 
 1. Go to the repository on GitHub
 2. Click **Fork** (top right)
@@ -12,69 +12,7 @@ Use your fork for everything below.
 
 ## Step 1: Gather your credentials
 
-Collect these before starting Step 2.
-
-### AWS credentials
-
-The tutorial code calls AWS Bedrock — most steps through the Bedrock Mantle (OpenAI-compatible) endpoint, Step 3 (Guardrails) through the native `bedrock-runtime` endpoint — so you need AWS credentials with permission to invoke Bedrock models and guardrails.
-
-#### Required IAM permissions
-
-Whichever credential type you use, the IAM identity needs the following policy.
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "bedrock-mantle:CallWithBearerToken"
-      ],
-      "Resource": "*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "bedrock-mantle:CreateInference"
-      ],
-      "Resource": "arn:aws:bedrock-mantle:us-east-2:*:project/default"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "bedrock:InvokeModel"
-      ],
-      "Resource": "arn:aws:bedrock:us-east-2::foundation-model/openai.gpt-oss-120b-1:0"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "bedrock:GetGuardrail",
-        "bedrock:ApplyGuardrail"
-      ],
-      "Resource": "arn:aws:bedrock:us-east-2:*:guardrail/*"
-    }
-  ]
-}
-```
-
-Most steps call the model through the `bedrock-mantle` endpoint — that is what the first two statements cover. **Step 3 (Guardrails) is the exception.** AWS Bedrock Guardrails do not work through `bedrock-mantle` — the OpenAI compatibility layer has no parameter for attaching a guardrail. Step 3 calls the native `bedrock-runtime` `converse` API instead, which needs `bedrock:InvokeModel` to run the model plus `bedrock:GetGuardrail` and `bedrock:ApplyGuardrail` to attach and evaluate the guardrail. The third and fourth statements grant that.
-
-#### Put your credentials in `~/.aws/credentials`
-
-The dev container reads your credentials from `~/.aws/credentials` on your machine. You don't need the AWS CLI installed locally. Follow [Prerequisites, AWS credentials](prerequisites.md#aws-credentials) to create the file.
-
-Don't have credentials yet? Ask your AWS administrator for temporary credentials (access key, secret key and session token) for an identity with the policy above. If you have a personal AWS account, you can create an IAM user instead:
-
-1. In the [IAM console](https://console.aws.amazon.com/iam/), go to **Policies → Create policy**
-2. Switch to the **JSON** editor, paste the policy above, and save it with a name like `BedrockInvokePolicy`
-3. Go to **Users → Create user**, give it a name (e.g. `ai-lab`), and attach the `BedrockInvokePolicy` you just created
-4. Open the new user, go to **Security credentials → Create access key**, choose **Other**, and download the key
-5. Put the access key ID (starts with `AKIA`) and secret access key in `~/.aws/credentials`. Omit the `aws_session_token` line.
-
-!!! warning "Access keys don't expire"
-    Delete this user and its keys when you're done with the lab. Never commit them to git.
+Collect these before starting Step 2. Your AWS credentials and IAM permissions are covered in [Prerequisites](prerequisites.md#aws-credentials), so they are not repeated here.
 
 ### AWS Bedrock Guardrail
 
@@ -142,7 +80,7 @@ The OTel Collector uses this to send traces and metrics to your Dynatrace enviro
 The `dtctl` CLI uses this to run DQL queries.
 
 1. Go to `https://myaccount.dynatrace.com/platformTokens`
-2. Click **Generate token**, name it (e.g. `dtctl-local`), and add:
+2. Click **Create token**, name it (e.g. `dtctl-local`), and add:
     - `storage:metrics:read`
     - `storage:spans:read`
     - `storage:buckets:read`
@@ -174,7 +112,7 @@ Two external services are involved:
 - **AWS Bedrock** — the AI model API your exercise code calls
 - **Dynatrace** — receives and stores all traces, metrics, and logs; `dtctl` queries it directly
 
-This is why you need **five values** from Step 1: two AWS credentials plus a guardrail ID (to call Bedrock and enforce guardrails), and two Dynatrace tokens (one to push telemetry, one to query it).
+This is why you need an AWS credentials file (from Prerequisites), a guardrail ID (to enforce guardrails), your tenant ID, and two Dynatrace tokens (one to push telemetry, one to query it).
 
 ---
 
@@ -211,11 +149,19 @@ Requires a container runtime that provides `docker` and `docker compose` (see [P
 
     `GUARDRAIL_ID` is the value you copied when creating the guardrail in Step 1. It's used by the smoke test and by Step 3 of the tutorial.
 
-4. Open the folder in VS Code and run **Dev Containers: Reopen in Container** from the command palette. Wait for the container to build — the OTel Collector starts and `dtctl` is configured automatically.
+4. Open the folder in VS Code > View > Command Palette. Search for `rebuild`. Then choose `Dev Containers: Reopen in Container`.
+
+VSCode will reload and the demo environment is now building. Be patient and watch the log.
+
+You should see: `Done. Press any key to close the terminal.`
+
+Hit `Enter` and the terminal window will disappear. You're now ready to start the lab!
 
 ## Step 3: Verify the pipeline
 
 **Do this before starting any exercise.** Every lab depends on this pipeline working.
+
+Go to `Terminal` and `New Terminal`.
 
 ```bash
 python code/smoke-test.py
@@ -223,7 +169,9 @@ python code/smoke-test.py
 
 The script runs **three checks** and exits non-zero if any fails.
 
-**Check 1** confirms that your exercise code can reach the OTel Collector and that telemetry is accepted. **Check 2** confirms that your AWS credentials are valid and that the Bedrock model responds through the Mantle endpoint used by most steps. **Check 3** confirms that your credentials also work against the native `bedrock-runtime` endpoint and that your `GUARDRAIL_ID` resolves and applies correctly — this is what Step 3 (Guardrails) needs.
+1. **Check 1** confirms that your exercise code can reach the OTel Collector and that telemetry is accepted.
+1. **Check 2** confirms that your AWS credentials are valid and that the Bedrock model responds through the Mantle endpoint used by most steps.
+1. **Check 3** confirms that your credentials also work against the native `bedrock-runtime` endpoint and that your `GUARDRAIL_ID` resolves and applies correctly — this is what Step 3 (Guardrails) needs.
 
 Expected output when all three pass:
 
@@ -252,9 +200,9 @@ All checks passed. Wait ~60 s then verify data reached Dynatrace:
 
 If Check 1 fails with a connection error, the OTel Collector is not reachable on port 4318 — re-check Step 2.4 and confirm the container built successfully.
 
-If Check 2 fails, follow the error message: either your `~/.aws/credentials` file is missing, wrong or expired (temporary credentials need a fresh session token), or the IAM identity lacks the `bedrock-mantle:CallWithBearerToken` and `bedrock-mantle:CreateInference` permissions from the policy above.
+If Check 2 fails, follow the error message: either your `~/.aws/credentials` file is missing, wrong or expired (temporary credentials need a fresh session token), or the IAM identity lacks the `bedrock-mantle:CallWithBearerToken` and `bedrock-mantle:CreateInference` permissions from the [IAM policy in Prerequisites](prerequisites.md#required-iam-permissions).
 
-If Check 3 fails, follow the error message: either `GUARDRAIL_ID` is not set (see Step 2.3), the guardrail doesn't exist in `AWS_REGION`, or the IAM identity lacks `bedrock:InvokeModel`, `bedrock:GetGuardrail`, or `bedrock:ApplyGuardrail` from the policy above.
+If Check 3 fails, follow the error message: either `GUARDRAIL_ID` is not set (see Step 2.3), the guardrail doesn't exist in `us-east-2`, or the IAM identity lacks `bedrock:InvokeModel`, `bedrock:GetGuardrail`, or `bedrock:ApplyGuardrail` from the [IAM policy in Prerequisites](prerequisites.md#required-iam-permissions).
 
 Wait about **60 seconds**, then run:
 
