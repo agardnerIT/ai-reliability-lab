@@ -123,8 +123,8 @@ try:
     token = provide_token()
 except Exception as exc:
     print(f"\n[FAIL] Could not generate AWS Bedrock token: {exc}", file=sys.stderr)
-    print("       Check that AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and", file=sys.stderr)
-    print("       AWS_REGION are set correctly (or that aws sso login succeeded).", file=sys.stderr)
+    print("       Check that ~/.aws/credentials exists and its keys and session", file=sys.stderr)
+    print("       token are correct and have not expired.", file=sys.stderr)
     sys.exit(1)
 
 try:

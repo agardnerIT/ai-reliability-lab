@@ -61,28 +61,17 @@ Whichever credential type you use, the IAM identity needs the following policy.
 
 Most steps call the model through the `bedrock-mantle` endpoint — that is what the first two statements cover. **Step 3 (Guardrails) is the exception.** AWS Bedrock Guardrails do not work through `bedrock-mantle` — the OpenAI compatibility layer has no parameter for attaching a guardrail. Step 3 calls the native `bedrock-runtime` `converse` API instead, which needs `bedrock:InvokeModel` to run the model plus `bedrock:GetGuardrail` and `bedrock:ApplyGuardrail` to attach and evaluate the guardrail. The third and fourth statements grant that.
 
-#### Option A: IAM Identity Center (recommended)
+#### Put your credentials in `~/.aws/credentials`
 
-If your organisation uses IAM Identity Center (SSO), ask your AWS administrator to attach a permission set containing the policy above to your account. Your credentials will be short-lived and rotate automatically — no keys to manage.
+The dev container reads your credentials from `~/.aws/credentials` on your machine. You don't need the AWS CLI installed locally. Follow [Prerequisites, AWS credentials](prerequisites.md#aws-credentials) to create the file.
 
-Once access is granted, log in:
-
-```bash
-aws sso login --profile your-profile-name
-```
-
-Note the profile name — you'll use it in Step 2 if your credentials are not already in `~/.aws`.
-
-#### Option B: IAM user with access keys
-
-Use this if you have a personal AWS account or your organisation doesn't use IAM Identity Center.
+Don't have credentials yet? Ask your AWS administrator for temporary credentials (access key, secret key and session token) for an identity with the policy above. If you have a personal AWS account, you can create an IAM user instead:
 
 1. In the [IAM console](https://console.aws.amazon.com/iam/), go to **Policies → Create policy**
 2. Switch to the **JSON** editor, paste the policy above, and save it with a name like `BedrockInvokePolicy`
 3. Go to **Users → Create user**, give it a name (e.g. `ai-lab`), and attach the `BedrockInvokePolicy` you just created
 4. Open the new user, go to **Security credentials → Create access key**, choose **Other**, and download the key
-
-You'll have an `AWS_ACCESS_KEY_ID` (starts with `AKIA`) and `AWS_SECRET_ACCESS_KEY`. Note both — you'll need them in Step 2.
+5. Put the access key ID (starts with `AKIA`) and secret access key in `~/.aws/credentials`. Omit the `aws_session_token` line.
 
 !!! warning "Access keys don't expire"
     Delete this user and its keys when you're done with the lab. Never commit them to git.
@@ -136,7 +125,7 @@ On the final review page, click **Create guardrail**. AWS will create it and tak
 On the detail page, you will see a field called **Guardrail ID**. It looks something like `abc123def456`. Copy this value — you'll set it as `GUARDRAIL_ID` in Step 2.
 
 !!! note "Guardrails are region-specific"
-    We've used `us-east-2` so far in these tutorials. A guardrail created in `us-east-1` cannot be used with a model endpoint in `us-east-2`. Make sure the region where you created the guardrail matches the `AWS_REGION` environment variable you have set for the app.
+    We've used `us-east-2` so far in these tutorials. A guardrail created in `us-east-1` cannot be used with a model endpoint in `us-east-2`. Make sure you create the guardrail in `us-east-2`, the region the dev container uses.
 
 ### Dynatrace API token
 
@@ -212,17 +201,15 @@ Requires a container runtime that provides `docker` and `docker compose` (see [P
     DTCTL_PLATFORM_TOKEN=dt0s16.XXXX...
     ```
 
-3. **AWS credentials:** the dev container mounts your `~/.aws` folder automatically. The folder must exist on your machine or the container won't start, so run `mkdir -p ~/.aws` if you don't have one. If you previously ran `aws configure` or `aws sso login`, your credentials are already available inside the container — nothing else to do. If not, add them to `.devcontainer/.env` as well:
+3. **AWS credentials:** the dev container mounts your `~/.aws` folder automatically, so make sure `~/.aws/credentials` exists (see [Prerequisites](prerequisites.md#aws-credentials)). The container won't start if the `~/.aws` folder is missing. The region (`us-east-2`) is set by the dev container.
+
+    Add your guardrail ID to `.devcontainer/.env`:
 
     ```
-    AWS_ACCESS_KEY_ID=AKIA...
-    AWS_SECRET_ACCESS_KEY=...
-    AWS_SESSION_TOKEN=...
-    AWS_REGION=us-east-2
     GUARDRAIL_ID=abc123def456
     ```
 
-    `GUARDRAIL_ID` is the value you copied when creating the guardrail in Step 1 — it's used by the smoke test and by Step 3 of the tutorial.
+    `GUARDRAIL_ID` is the value you copied when creating the guardrail in Step 1. It's used by the smoke test and by Step 3 of the tutorial.
 
 4. Open the folder in VS Code and run **Dev Containers: Reopen in Container** from the command palette. Wait for the container to build — the OTel Collector starts and `dtctl` is configured automatically.
 
@@ -265,7 +252,7 @@ All checks passed. Wait ~60 s then verify data reached Dynatrace:
 
 If Check 1 fails with a connection error, the OTel Collector is not reachable on port 4318 — re-check Step 2.4 and confirm the container built successfully.
 
-If Check 2 fails, follow the error message: either your AWS credentials are not set (`AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION`), or the IAM identity lacks the `bedrock-mantle:CallWithBearerToken` and `bedrock-mantle:CreateInference` permissions from the policy above.
+If Check 2 fails, follow the error message: either your `~/.aws/credentials` file is missing, wrong or expired (temporary credentials need a fresh session token), or the IAM identity lacks the `bedrock-mantle:CallWithBearerToken` and `bedrock-mantle:CreateInference` permissions from the policy above.
 
 If Check 3 fails, follow the error message: either `GUARDRAIL_ID` is not set (see Step 2.3), the guardrail doesn't exist in `AWS_REGION`, or the IAM identity lacks `bedrock:InvokeModel`, `bedrock:GetGuardrail`, or `bedrock:ApplyGuardrail` from the policy above.
 

@@ -69,7 +69,7 @@ We chose this because it's realistic: most production AI apps involve more than 
 
 Complete [Foundation → Setup](../foundation/setup.md) before running any exercise. It walks you through:
 
-- [ ] AWS credentials (no AWS CLI required — environment variables work)
+- [ ] A `~/.aws/credentials` file (no AWS CLI required)
 - [ ] Dynatrace API token and platform token
 - [ ] Codespaces environment (see [Foundation → Setup](../foundation/setup.md))
 - [ ] Verifying the OTel Collector is running on `localhost:4318`
