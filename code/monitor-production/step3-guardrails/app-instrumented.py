@@ -61,7 +61,7 @@ token_usage = meter.create_histogram(
 # Counter that increments every time the guardrail blocks a request.
 # Use this in Dynatrace to track guardrail intervention rate over time.
 guardrail_blocks = meter.create_counter(
-    name="gen_ai.guardrail.blocked_requests",
+    name="app.guardrail.blocked_requests",
     unit="{request}",
     description="Number of requests blocked by the AWS Bedrock Guardrail",
 )
@@ -102,7 +102,7 @@ for query in queries:
         span.set_attribute("gen_ai.provider.name",  "aws.bedrock")
         span.set_attribute("gen_ai.operation.name", "chat")
         span.set_attribute("gen_ai.request.model",  MODEL)
-        span.set_attribute("gen_ai.guardrail.id",   GUARDRAIL_ID)
+        span.set_attribute("aws.bedrock.guardrail.id",   GUARDRAIL_ID)
 
         span.add_event("gen_ai.system.message",
                        {"gen_ai.event.content": json.dumps({"role": "system", "content": SYSTEM_PROMPT})})
@@ -133,7 +133,7 @@ for query in queries:
 
         span.set_attribute("gen_ai.response.model",          MODEL)
         span.set_attribute("gen_ai.response.finish_reasons", [stop_reason])
-        span.set_attribute("gen_ai.guardrail.blocked",       blocked)
+        span.set_attribute("app.guardrail.blocked",       blocked)
 
         usage = response.get("usage", {})
         if usage:
@@ -153,7 +153,7 @@ for query in queries:
 
         if blocked:
             guardrail_blocks.add(1, {"gen_ai.request.model": MODEL,
-                                     "gen_ai.guardrail.id":  GUARDRAIL_ID})
+                                     "aws.bedrock.guardrail.id":  GUARDRAIL_ID})
 
         print(f"Q: {query}")
         print(f"A: {content or '(blocked by guardrail)'}")

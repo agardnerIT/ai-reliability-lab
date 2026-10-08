@@ -163,8 +163,8 @@ This is the signal the instrumented version uses to detect a block.
 
 The instrumented version wraps each call in a span and adds two things:
 
-1. A `gen_ai.guardrail.blocked` attribute on the span, set to `True` when `stop_reason == "guardrail_intervened"`. This makes every blocked call visible in Dynatrace distributed traces.
-2. A `gen_ai.guardrail.blocked_requests` counter metric that increments each time a request is blocked. This is what you use to build dashboards and alerts.
+1. An `app.guardrail.blocked` attribute on the span, set to `True` when `stop_reason == "guardrail_intervened"`. This makes every blocked call visible in Dynatrace distributed traces.
+2. An `app.guardrail.blocked_requests` counter metric that increments each time a request is blocked. This is what you use to build dashboards and alerts.
 
 ```python title="code/monitor-production/step3-guardrails/app-instrumented.py"
 # Customer support chatbot with AWS Bedrock Guardrail and OTel instrumentation.
@@ -216,7 +216,7 @@ token_usage = meter.create_histogram(
 # Counter that increments every time the guardrail blocks a request.
 # Use this in Dynatrace to track guardrail intervention rate over time.
 guardrail_blocks = meter.create_counter(
-    name="gen_ai.guardrail.blocked_requests",
+    name="app.guardrail.blocked_requests",
     unit="{request}",
     description="Number of requests blocked by the AWS Bedrock Guardrail",
 )
@@ -248,7 +248,7 @@ for query in QUERIES:
         span.set_attribute("gen_ai.provider.name",  "aws.bedrock")
         span.set_attribute("gen_ai.operation.name", "chat")
         span.set_attribute("gen_ai.request.model",  MODEL)
-        span.set_attribute("gen_ai.guardrail.id",   GUARDRAIL_ID)
+        span.set_attribute("aws.bedrock.guardrail.id",   GUARDRAIL_ID)
 
         span.add_event("gen_ai.system.message",
                        {"gen_ai.event.content": json.dumps({"role": "system", "content": SYSTEM_PROMPT})})
@@ -282,7 +282,7 @@ for query in QUERIES:
 
         span.set_attribute("gen_ai.response.model",          MODEL)
         span.set_attribute("gen_ai.response.finish_reasons", [stop_reason])
-        span.set_attribute("gen_ai.guardrail.blocked",       blocked)
+        span.set_attribute("app.guardrail.blocked",       blocked)
 
         usage = response.get("usage", {})
         if usage:
@@ -305,7 +305,7 @@ for query in QUERIES:
             # the intervention rate spikes — a sign of a coordinated injection
             # attempt or an over-tuned guardrail rejecting legitimate traffic.
             guardrail_blocks.add(1, {"gen_ai.request.model": MODEL,
-                                     "gen_ai.guardrail.id":  GUARDRAIL_ID})
+                                     "aws.bedrock.guardrail.id":  GUARDRAIL_ID})
 
         print(f"Q: {query}")
         print(f"A: {content or '(blocked by guardrail)'}")
@@ -324,34 +324,34 @@ Two additions on top of the standard span pattern from earlier steps:
 
 ```python
 blocked = stop_reason == "guardrail_intervened"
-span.set_attribute("gen_ai.guardrail.blocked", blocked)
+span.set_attribute("app.guardrail.blocked", blocked)
 ```
 
-Every span now carries whether this request was blocked. In Dynatrace, you can filter traces by `gen_ai.guardrail.blocked = true` to see only the blocked calls, read what the user sent, and decide whether the guardrail is tuned correctly.
+Every span now carries whether this request was blocked. In Dynatrace, you can filter traces by `app.guardrail.blocked = true` to see only the blocked calls, read what the user sent, and decide whether the guardrail is tuned correctly.
 
 **The counter metric:**
 
 ```python
 guardrail_blocks = meter.create_counter(
-    name="gen_ai.guardrail.blocked_requests",
+    name="app.guardrail.blocked_requests",
     unit="{request}",
     description="Number of requests blocked by the AWS Bedrock Guardrail",
 )
 
 if blocked:
     guardrail_blocks.add(1, {"gen_ai.request.model": MODEL,
-                             "gen_ai.guardrail.id":  GUARDRAIL_ID})
+                             "aws.bedrock.guardrail.id":  GUARDRAIL_ID})
 ```
 
 The counter goes up by one every time a request is blocked. Over time, you can chart this metric in Dynatrace to see your guardrail intervention rate.
 
 ## What you'll see in Dynatrace
 
-**In traces:** Filter spans by `gen_ai.guardrail.blocked = true`. You will see exactly which requests were blocked. Each span also carries `gen_ai.guardrail.id` so if you run multiple guardrails across different bots, you can tell them apart.
+**In traces:** Filter spans by `app.guardrail.blocked = true`. You will see exactly which requests were blocked. Each span also carries `aws.bedrock.guardrail.id` so if you run multiple guardrails across different bots, you can tell them apart.
 
-**In metrics:** Chart `gen_ai.guardrail.blocked_requests` over time. A flat line close to zero is what you want. A sudden spike means something changed: either users discovered an injection pattern and are trying it repeatedly, or a recent guardrail configuration change started blocking requests it should not.
+**In metrics:** Chart `app.guardrail.blocked_requests` over time. A flat line close to zero is what you want. A sudden spike means something changed: either users discovered an injection pattern and are trying it repeatedly, or a recent guardrail configuration change started blocking requests it should not.
 
-**Setting an alert:** In Dynatrace, create a metric alert on `gen_ai.guardrail.blocked_requests`. Set the threshold relative to your normal traffic volume. If the block rate rises above a certain percentage of total requests, alert your team. A spike is either a security incident or a misconfigured guardrail. Either way, you want to know about it.
+**Setting an alert:** In Dynatrace, create a metric alert on `app.guardrail.blocked_requests`. Set the threshold relative to your normal traffic volume. If the block rate rises above a certain percentage of total requests, alert your team. A spike is either a security incident or a misconfigured guardrail. Either way, you want to know about it.
 
 ## Query it with dtctl
 
@@ -362,8 +362,8 @@ After running `python app-instrumented.py`, confirm the guardrail telemetry arri
 ```bash
 dtctl query 'fetch spans
 | filter service.name == "anycloud-support-bot"
-| filter gen_ai.guardrail.blocked == true
-| fields start_time, span.name, gen_ai.guardrail.id, gen_ai.response.finish_reasons
+| filter app.guardrail.blocked == true
+| fields start_time, span.name, aws.bedrock.guardrail.id, gen_ai.response.finish_reasons
 | sort start_time desc
 | limit 10'
 ```
@@ -375,10 +375,10 @@ You should see one row per blocked call (the tic-tac-toe injection) with `finish
 ```bash
 dtctl query 'fetch spans
 | filter service.name == "anycloud-support-bot"
-| filter gen_ai.guardrail.blocked == true
+| filter app.guardrail.blocked == true
 | expand span.events
 | filter span.events[span_event.name] == "gen_ai.user.message"
-| fields start_time, gen_ai.guardrail.id, prompt = span.events[gen_ai.event.content]
+| fields start_time, aws.bedrock.guardrail.id, prompt = span.events[gen_ai.event.content]
 | sort start_time desc
 | limit 10'
 ```
@@ -390,7 +390,7 @@ The `prompt` column holds the blocked user message. Use this to decide whether t
 ```bash
 dtctl query 'fetch spans
 | filter service.name == "anycloud-support-bot"
-| summarize requests = count(), by: {gen_ai.guardrail.blocked}'
+| summarize requests = count(), by: {app.guardrail.blocked}'
 ```
 
 With the four demo queries you should see three `false` and one `true` for each run.
@@ -400,7 +400,7 @@ With the four demo queries you should see three `false` and one `true` for each 
 ```bash
 dtctl query 'fetch spans
 | filter service.name == "anycloud-support-bot"
-| summarize total = count(), blocked = countIf(gen_ai.guardrail.blocked == true)
+| summarize total = count(), blocked = countIf(app.guardrail.blocked == true)
 | fieldsAdd block_rate_pct = 100.0 * blocked / total'
 ```
 
@@ -409,21 +409,21 @@ With the four demo queries the block rate is 25%. In production, this is the num
 ### Check the counter metric
 
 ```bash
-dtctl query 'timeseries blocked = sum(gen_ai.guardrail.blocked_requests), by: {gen_ai.guardrail.id, gen_ai.request.model}
+dtctl query 'timeseries blocked = sum(app.guardrail.blocked_requests), by: {aws.bedrock.guardrail.id, gen_ai.request.model}
 | fieldsAdd total = arraySum(blocked)
-| fields gen_ai.guardrail.id, gen_ai.request.model, total'
+| fields aws.bedrock.guardrail.id, gen_ai.request.model, total'
 ```
 
 You should see one row with the total number of blocked requests. If you have not yet triggered a block, the metric does not exist and the query returns no rows.
 
 ???+ info "Event attribute names"
-    The user-message query reads the span event that the instrumented app adds with `span.add_event("gen_ai.user.message", ...)`. If your tenant returns no `prompt` values, run `fetch spans | filter gen_ai.guardrail.blocked == true | limit 1` and inspect the `span.events` field to see how events are shaped in your environment.
+    The user-message query reads the span event that the instrumented app adds with `span.add_event("gen_ai.user.message", ...)`. If your tenant returns no `prompt` values, run `fetch spans | filter app.guardrail.blocked == true | limit 1` and inspect the `span.events` field to see how events are shaped in your environment.
 
 ## Two things guardrail observability tells you
 
 **1. Is the guardrail doing its job?**
 
-If `gen_ai.guardrail.blocked_requests` stays at zero, either no one is trying injection attacks (good), or the guardrail is not triggering when it should (bad). Looking at the traces for blocked requests lets you verify that the real injection attempts are being caught.
+If `app.guardrail.blocked_requests` stays at zero, either no one is trying injection attacks (good), or the guardrail is not triggering when it should (bad). Looking at the traces for blocked requests lets you verify that the real injection attempts are being caught.
 
 **2. Is the guardrail over-blocking?**
 
@@ -436,7 +436,7 @@ If the block rate is unusually high, look at what queries are being blocked. It 
 | | What's new |
 |---|---|
 | **Step 1-2** | Observability on a single instrumented call |
-| **Step 3** | Guardrail intervention detection via `gen_ai.guardrail.blocked` span attribute and `gen_ai.guardrail.blocked_requests` counter metric |
+| **Step 3** | Guardrail intervention detection via `app.guardrail.blocked` span attribute and `app.guardrail.blocked_requests` counter metric |
 
 Guardrails are a Bedrock-managed safety layer. The instrumentation here makes that layer visible in your observability stack. You configured the guardrail in AWS; the telemetry tells you whether it is working.
 
