@@ -114,7 +114,7 @@ Run this code and it works. You get a response. But you know nothing about:
 
 These are questions that matter in production. If this app handles 10,000 requests a day, you need to know when latency spikes, when costs are unusually high, and when the model starts returning errors.
 
-[Step 2](../02-add-observability/) adds the instrumentation to capture all of this.
+[Step 2](02-add-observability.md) adds the instrumentation to capture all of this.
 
 ## What you should see
 
