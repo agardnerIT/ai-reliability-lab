@@ -44,15 +44,14 @@ Your company has been using `openai.gpt-oss-120b` (the control model) to handle 
 
 The migration plan is:
 
-| Phase | Split (control / challenger) | Goal |
-|---|---|---|
-| 1 | 100 / 0 | Baseline: all traffic to control, establish reference metrics |
-| 2 | 90 / 10 | Smoke test: confirm the challenger works at all |
-| 3 | 80 / 20 | Widen the sample: confirm the early results hold with more traffic |
-| 4 | 50 / 50 | Head-to-head: enough data to compare properly |
-| 5 | 0 / 100 | Complete the migration if metrics are acceptable |
+| Phase | Split (control / challenger) | Complaints | Goal |
+|---|---|---|---|
+| 1 | 100 / 0 | C001 to C025 | Baseline: all traffic to control, establish reference metrics |
+| 2 | 80 / 20 | C026 to C050 | Smoke test: confirm the challenger works at all |
+| 3 | 50 / 50 | C051 to C075 | Head-to-head: enough data to compare properly |
+| 4 | 20 / 80 | C076 to C100 | Near-complete migration: confirm the results hold at scale |
 
-Each step exposes more traffic to the challenger only after the previous one looked healthy. If a step goes wrong, put the percentages back: the flag is your rollback. At each phase, Dynatrace gives you the comparison. You are not guessing: you have a report.
+You do this in a single run. You start the app once and move through the phases by editing `flags.json` by hand while it runs. Each step exposes more traffic to the challenger only after the previous one looked healthy. If a step goes wrong, put the percentages back: the flag is your rollback. Dynatrace gives you the comparison at every point. You are not guessing: you have a report.
 
 ## Running it
 
@@ -64,9 +63,16 @@ python app-instrumented.py        # run all 100 complaints
 python app-instrumented.py C001   # run a specific complaint
 ```
 
-This step uses 100 complaints instead of the usual handful, because a 90 / 10 split only shows up in the data when there is enough traffic to split. Each complaint makes two model calls, so a full run takes several minutes. You will run the full set once per phase, so expect to wait. Start a run, then use the time to read the next section.
+This step uses 100 complaints instead of the usual handful, because a percentage split only shows up in the data when there is enough traffic to split. Each complaint makes two model calls, so a full run takes several minutes.
 
-No separate flag server to start. The app uses the official `openfeature-provider-flagd` package in file mode, which reads `flags.json` and polls for changes every five seconds. Edit the file and the next batch of complaints picks up the new split automatically.
+**You start the app once and run all 100 complaints in a single run.** While it is running, **you** change the traffic split by editing `flags.json` by hand. The app does not change the split for you. The [Running the migration](#running-the-migration) section tells you exactly when to make each edit.
+
+Because you need to edit a file while the app is busy, open two terminals (or one terminal and your editor):
+
+- **Terminal 1:** start `python app-instrumented.py` and leave it running. It prints `Complaint C001`, `Complaint C002` and so on as it goes. You use these lines to know when to make an edit.
+- **Terminal 2 or your editor:** edit and save `flags.json` when the run reaches each checkpoint.
+
+No separate flag server to start. The app uses the official `openfeature-provider-flagd` package in file mode, which reads `flags.json` and polls for changes every five seconds. Save the file and the next complaint to be evaluated picks up the new split automatically. You do not restart the app.
 
 ## The flag
 
@@ -102,12 +108,12 @@ To move to phase 2, edit the percentages inside the `fractional` rule:
 ```json
 "if": [
   {"<=": [{"var": "urgency"}, 2]},
-  {"fractional": [["control", 90], ["challenger", 10]]},
+  {"fractional": [["control", 80], ["challenger", 20]]},
   "control"
 ]
 ```
 
-Save the file. The provider picks up the change within five seconds. The running app will start routing roughly 10% of low-urgency complaints to the challenger on the next requests.
+Save the file. The provider picks up the change within five seconds. The running app will start routing roughly 20% of low-urgency complaints to the challenger on the next complaints it evaluates.
 
 ### Why flagd and OpenFeature?
 
@@ -180,47 +186,43 @@ model_requests.add(1, {
 
 This answers a question you must answer before reading quality metrics: **is the split working?**
 
-If you set challenger to 10% and run all 100 complaints, you expect roughly 6 in the challenger bucket (10% of the 60 low-urgency complaints). If you see 0, the flag is not being evaluated. If you see more than 60, the targeting rule is wrong, because high-urgency complaints should never reach the challenger. Only once the counter confirms the split is correct do the quality comparisons mean anything.
+If you set challenger to 20% and the run is at C040, you expect roughly 3 complaints in the challenger bucket so far (20% of the 15 or so low-urgency complaints in C026 to C040). If you see 0 after several complaints, the flag edit has not been picked up. If you see challenger requests on high-urgency complaints, the targeting rule is wrong, because those should never reach the challenger. Only once the counter confirms the split is correct do the quality comparisons mean anything.
 
 ## Running the migration
 
-Only the 60 low-urgency complaints are eligible for the challenger. The flag decides by the complaint ID, so the numbers below are approximate, and your run will be close to them but not identical:
+Start the app **once** and leave it running for all 100 complaints. You make the changes to `flags.json` yourself, by hand, at the checkpoints below. Nothing edits the file for you.
 
-| Phase | Split | Challenger requests | Control requests |
-|---|---|---|---|
-| 1 | 100 / 0 | 0 | 100 |
-| 2 | 90 / 10 | about 5 | about 95 |
-| 3 | 80 / 20 | about 10 | about 90 |
-| 4 | 50 / 50 | about 30 | about 70 |
-| 5 | 0 / 100 | 60 | 40 |
+Only the 60 or so low-urgency complaints are eligible for the challenger. The flag decides by the complaint ID, so the numbers below are approximate, and your run will be close to them but not identical:
 
-Because the same complaint always routes to the same variant, running the set again at the same split gives the same result. Moving to a larger challenger share keeps every complaint that was already on the challenger and adds more, so you are always comparing like with like.
+| Phase | Split | Complaints | Challenger requests | Control requests |
+|---|---|---|---|---|
+| 1 | 100 / 0 | C001 to C025 | 0 | 25 |
+| 2 | 80 / 20 | C026 to C050 | about 3 | about 22 |
+| 3 | 50 / 50 | C051 to C075 | about 7 | about 18 |
+| 4 | 20 / 80 | C076 to C100 | about 12 | about 13 |
 
-**Phase 1: establish a baseline**
+Because the same complaint always routes to the same variant, a complaint that lands in the challenger bucket stays there as you raise the percentage. Each phase adds more complaints to the challenger, so you are always comparing like with like.
 
-With `flags.json` at 100% control, run the full complaint set. All traces will have `feature_flag.variant = "control"`. This gives you reference values for latency and cost with no challenger traffic. Write them down. You will compare against these numbers in later phases.
+!!! warning "You must edit `flags.json` yourself"
+    The app never changes the split on its own. If you do nothing, every complaint goes to the control model and you will never see the challenger. Watch Terminal 1 for the `Complaint C0xx` lines and make each edit when the run reaches the checkpoint.
 
-**Phase 2: 90 / 10**
+**Start the run**
 
-Edit the `fractional` percentages in `flags.json`:
+In Terminal 1:
 
-```json
-"if": [
-  {"<=": [{"var": "urgency"}, 2]},
-  {"fractional": [["control", 90], ["challenger", 10]]},
-  "control"
-]
+```bash
+python app-instrumented.py
 ```
 
-The provider picks this up within five seconds. Run the complaints again. In Dynatrace, check `gen_ai.model_selection.requests` first. You should see roughly 90/10 in the counter for low-urgency complaints; high-urgency complaints will only appear under `"control"`. If the split looks right, then compare:
+Leave it running. Open Dynatrace alongside it (see [Watching the shift live](#watching-the-shift-live)) so you can see each change land.
 
-- `gen_ai.usage.input_tokens` split by `feature_flag.variant`: are input costs similar?
-- `gen_ai.usage.output_tokens` split by `feature_flag.variant`: is the challenger more verbose or more terse?
-- Span duration split by `feature_flag.variant`: is the challenger faster or slower?
+**Phase 1 (C001 to C025): establish a baseline**
 
-At 10% the question is only "does it work?" Look for errors and obvious problems, not fine differences. If anything looks wrong, set the split back to `100 / 0` and nothing else changes.
+`flags.json` starts at 100% control, so no edit is needed. All traces have `feature_flag.variant = "control"`. This gives you reference values for latency and cost with no challenger traffic. Write them down. You will compare against these numbers in later phases.
 
-**Phase 3: 80 / 20**
+**Phase 2 (C026 to C050): 80 / 20**
+
+When Terminal 1 shows `Complaint C026`, edit the `fractional` percentages in `flags.json` and save:
 
 ```json
 "if": [
@@ -230,9 +232,17 @@ At 10% the question is only "does it work?" Look for errors and obvious problems
 ]
 ```
 
-Run the complaints again and verify the counter shows roughly 80/20 before reading anything else. Then repeat the same three comparisons. You are checking that what you saw at 10% still holds with twice the traffic: the same token pattern, the same latency gap, and no new errors. Small differences that were noise at 10% start to show a trend here.
+The provider picks this up within five seconds. Do not restart the app. Within a few complaints, the terminal starts printing `Model variant: challenger (openai.gpt-oss-20b)` for some low-urgency complaints. In Dynatrace, check `gen_ai.model_selection.requests` first. You should see roughly 80/20 in the counter for low-urgency complaints; high-urgency complaints will only appear under `"control"`. If the split looks right, then compare:
 
-**Phase 4: 50 / 50**
+- `gen_ai.usage.input_tokens` split by `feature_flag.variant`: are input costs similar?
+- `gen_ai.usage.output_tokens` split by `feature_flag.variant`: is the challenger more verbose or more terse?
+- Span duration split by `feature_flag.variant`: is the challenger faster or slower?
+
+At 20% the question is only "does it work?" Look for errors and obvious problems, not fine differences. If anything looks wrong, set the split back to `100 / 0` and nothing else changes.
+
+**Phase 3 (C051 to C075): 50 / 50**
+
+When Terminal 1 shows `Complaint C051`, edit and save `flags.json` again:
 
 ```json
 "if": [
@@ -242,11 +252,25 @@ Run the complaints again and verify the counter shows roughly 80/20 before readi
 ]
 ```
 
-With equal traffic, the comparison is head-to-head. This is where you read the response content in the traces (`gen_ai.output.messages`) and make a qualitative judgement: are the challenger responses as useful as the control?
+With equal traffic, the comparison is head-to-head. Verify the counter shows roughly 50/50 for low-urgency complaints, then repeat the same three comparisons. This is also where you read the response content in the traces (`gen_ai.output.messages`) and make a qualitative judgement: are the challenger responses as useful as the control?
 
-**Phase 5: complete the migration**
+**Phase 4 (C076 to C100): 20 / 80**
 
-If the challenger looks good at 50%, complete the migration:
+When Terminal 1 shows `Complaint C076`, edit and save `flags.json` one last time:
+
+```json
+"if": [
+  {"<=": [{"var": "urgency"}, 2]},
+  {"fractional": [["control", 20], ["challenger", 80]]},
+  "control"
+]
+```
+
+You are checking that what you saw at 20% and 50% still holds with most of the low-urgency traffic on the challenger: the same token pattern, the same latency gap, and no new errors. Let the run finish.
+
+**After the run: complete the migration**
+
+If the challenger looks good, completing the migration means setting the split to 0 / 100:
 
 ```json
 "if": [
@@ -257,6 +281,8 @@ If the challenger looks good at 50%, complete the migration:
 ```
 
 Or, if you want to keep a clean record, flip `defaultVariant` to `"challenger"` and remove the targeting rule entirely. The traces continue to carry `feature_flag.variant = "challenger"` so the migration is recorded in your observability data.
+
+Before running the lab again, set `flags.json` back to `100 / 0`.
 
 ## What you'll see in Dynatrace
 
@@ -280,16 +306,119 @@ The child `invoke_agent sentiment` span (and its nested `chat` span) records the
 
 **Routing verification:** `gen_ai.model_selection.requests` split by `feature_flag.variant` confirms the actual distribution matches your flag configuration. Always check this before drawing conclusions from quality metrics.
 
+## Watching the shift live
+
+Because you change the split during one run, the best way to see the migration is a time series. Each chart below shows the challenger appearing when you save `flags.json`, then growing at each phase. Run these with `dtctl query`, or paste the DQL into a Dashboards tile or a Notebook. Set the timeframe to the last 30 minutes and refresh while the app runs.
+
+!!! note
+    The service name is `support-model-selection`. The `chat` span for the draft response does not carry `feature_flag.variant`, so these queries group by `gen_ai.request.model` instead. That is the same split: `openai.gpt-oss-120b` is the control and `openai.gpt-oss-20b` is the challenger. The urgency scoring call also uses a `chat` span, and always uses the control model. The queries exclude it by filtering out spans with a `gen_ai.agent.name`.
+
+### Traffic split over time
+
+This is the headline chart. Use a stacked area or bar chart.
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-model-selection"
+| filter transaction.is_root_span == true
+| filter isNotNull(feature_flag.variant)
+| makeTimeseries requests = count(), by: {feature_flag.variant}, interval: 30s'
+```
+
+At first you see only `control`. After the phase 2 edit a `challenger` series appears, and it takes over the chart by phase 4.
+
+### Challenger share (%) over time
+
+Use a line chart with a single line that climbs as you raise the percentage. This one shows only low-urgency complaints, because those are the only ones eligible for the challenger.
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-model-selection"
+| filter transaction.is_root_span == true
+| filter complaint.urgency <= 2
+| makeTimeseries
+    total = count(),
+    challenger = countIf(feature_flag.variant == "challenger"),
+    interval: 1m
+| fieldsAdd challenger_pct = challenger[] / total[] * 100
+| fields interval, challenger_pct'
+```
+
+### Latency by model over time
+
+Use a line chart with one line per model. Compare how fast each answers.
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-model-selection"
+| filter gen_ai.operation.name == "chat"
+| filter isNull(gen_ai.agent.name)
+| makeTimeseries avg_latency = avg(duration), by: {gen_ai.request.model}, interval: 1m'
+```
+
+### Output tokens by model over time
+
+Use a line chart. This is your cost signal: fewer output tokens per answer is cheaper.
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-model-selection"
+| filter gen_ai.operation.name == "chat"
+| filter isNull(gen_ai.agent.name)
+| makeTimeseries avg_output_tokens = avg(gen_ai.usage.output_tokens), by: {gen_ai.request.model}, interval: 1m'
+```
+
+### Side-by-side comparison table
+
+Use a table. This produces the numbers for [the report](#the-report).
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-model-selection"
+| filter gen_ai.operation.name == "chat"
+| filter isNull(gen_ai.agent.name)
+| summarize
+    requests = count(),
+    avg_input_tokens = round(avg(gen_ai.usage.input_tokens), decimals:0),
+    avg_output_tokens = round(avg(gen_ai.usage.output_tokens), decimals:0),
+    avg_latency_s = round(avg(toLong(duration)) / 1000000000, decimals:2),
+    by: {gen_ai.request.model}'
+```
+
+The control row also includes the high-urgency complaints, which never reach the challenger, so its numbers are not a like-for-like comparison. For a fair comparison, filter the control traces to `complaint.urgency <= 2` in the Traces view, as described in [the report](#the-report).
+
+### Verify the split with the routing counter
+
+The same split from the metric rather than the spans. Use this to confirm that the metric and the traces agree.
+
+```bash
+dtctl query 'timeseries requests = sum(gen_ai.model_selection.requests), by: {feature_flag.variant}, interval: 30s'
+```
+
+### Build the dashboard
+
+Create a new dashboard called **Model migration** with these tiles, in this order, so the story reads from top to bottom:
+
+| Tile | Query | Visualization |
+|---|---|---|
+| Traffic split over time | Traffic split over time | Stacked area |
+| Challenger share (%) | Challenger share (%) over time | Line |
+| Latency by model | Latency by model over time | Line |
+| Output tokens by model | Output tokens by model over time | Line |
+| Comparison | Side-by-side comparison table | Table |
+
+Set the dashboard refresh to 10 seconds and the timeframe to the last 30 minutes before you start the run. Then run `python app-instrumented.py`, and save each `flags.json` edit at its checkpoint. The first tile makes the shift visible to anyone watching.
+
 ## The report
 
-After phase 4, you have the data to make the call. The comparison in Dynatrace looks something like this:
+At the end of the run, you have the data to make the call. The comparison in Dynatrace looks something like this:
 
 | Metric | Control | Challenger |
 |---|---|---|
 | Avg input tokens | 312 | 308 |
 | Avg output tokens | 187 | 152 |
 | Avg latency | 2.4s | 1.1s |
-| Requests | 70 | 30 |
+| Requests | 78 | 22 |
 
 The challenger uses fewer output tokens (cheaper) and responds faster. The question is whether the shorter output means the quality is worse. That judgment comes from reading the `gen_ai.output.messages` content in the traces alongside the numbers. Dynatrace gives you both in the same place.
 
