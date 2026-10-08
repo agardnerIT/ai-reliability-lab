@@ -68,9 +68,8 @@ Our pipeline processes customer complaints:
 ## Running it
 
 ```bash
-cd code/monitor-production/step4-agentic-pipeline
+cd /workspace/code/monitor-production/step4-agentic-pipeline
 
-export AWS_REGION=us-east-2
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 
 python app-instrumented.py        # run all complaints
@@ -186,6 +185,18 @@ Respond only with valid JSON:
 ```
 
 Storing system prompts as files (not hardcoded strings) means you can edit agent behaviour without touching Python code, and you can version them in git separately from the application logic.
+
+!!! example "Exercise: swap the sentiment agent for a decision model"
+    The sentiment agent is a perfect use case for a new class of model: the **decision model** (also called a "system one" model). Instead of generating free text, a decision model picks between predefined options and returns a confidence score. That is exactly what the urgency gate does.
+
+    Recent examples include [Strands Decider 2B](https://strandsagents.com/blog/introducing-strands-decider/), an open-source 2B-parameter decision model, and Jev from TypeSafe AI.
+
+    We tried this, but the model is a bit too heavy to run in the local Codespace, so we left it out of the lab. If you have the resources, try it yourself:
+
+    1. Run a decision model locally, or on hardware that can handle it.
+    2. Replace the `sentiment` call in `triage()` with a call to the decision model, mapping its output to the 1-5 urgency scale.
+    3. Keep the `invoke_agent` and `chat` spans (adjust the `gen_ai.request.model` attribute) so the trace shape stays the same.
+    4. Compare latency, token usage and escalation rate in Dynatrace against the LLM-based sentiment agent.
 
 ## What you see in Dynatrace
 
