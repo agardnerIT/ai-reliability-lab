@@ -229,6 +229,22 @@ dtctl query 'timeseries runs = sum(smoke_test.runs), by: {service.name}
     2. Check the collector logs: `docker logs $(docker ps -q --filter "name=otel-collector") | tail -30`
     3. Look for lines containing `error` or `REFUSED` — these usually name the missing permission
 
+## Understand the lab
+
+From a terminal **on your local machine**, run `docker ps`.
+
+You should see two containers:
+
+```bash
+% docker ps
+CONTAINER ID   IMAGE                                          COMMAND                  CREATED         STATUS         PORTS     NAMES
+**   otel/opentelemetry-collector-contrib:0.161.0   "/otelcol-contrib --…"   5 minutes ago   Up 5 minutes             ai-reliability-lab_devcontainer-otel-collector-1
+**   ai-reliability-lab_devcontainer-app            "/bin/sh -c 'echo Co…"   5 minutes ago   Up 5 minutes             ai-reliability-lab_devcontainer-app-1
+```
+
+* One will be an OpenTelemetry collector
+* One will be the entire lab environment devcontainer (this is the container you're sitting in as `root`)
+
 ## Choose your path
 
 - **[Monitor Production AI](../monitor-production/index.md)** — Add observability to a running AI application, step by step
