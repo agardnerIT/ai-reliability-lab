@@ -41,9 +41,8 @@ This changes the instrumentation pattern in three important ways.
 ## Running it
 
 ```bash
-cd code/monitor-production/step6-streaming
+cd /workspace/code/monitor-production/step6-streaming
 
-export AWS_REGION=us-east-2
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 
 python app-instrumented.py        # run all complaints
