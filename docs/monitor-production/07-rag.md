@@ -144,7 +144,7 @@ This tracks how many chunks are returned per complaint. A consistently low value
 Before setting an alert on this metric, check how your vector database (we use the open source vector database [ChromaDB](https://github.com/chroma-core/chroma) for this demo) is configured, because that determines whether the metric can vary at all.
 
 ```python title="step7-rag/app-instrumented.py"
-RETRIEVAL_THRESHOLD = 0.5
+RETRIEVAL_THRESHOLD = 0.6
 
 chroma     = chromadb.Client()
 collection = chroma.create_collection(
@@ -164,7 +164,7 @@ metas  = [m for m, d in zip(metas,  distances) if d <= RETRIEVAL_THRESHOLD]
 
 ChromaDB supports three distance functions: `l2` (the default), `cosine`, and `ip` (inner product). The choice affects which chunks get returned for a given query. For semantic text search, `cosine` is a good starting point: it measures how similar two pieces of text are in meaning, regardless of their length. See the [ChromaDB docs](https://docs.trychroma.com/docs/collections/configure) for guidance on when to use each.
 
-This demo uses `cosine` with a threshold of `0.5`. Cosine distance runs from 0 (identical meaning) to 1 (completely unrelated), so anything above 0.5 gets dropped. This means `chunk_count` can now be anywhere from 0 to `n_results` depending on how well the complaint matches the policy, so the metric actually varies and alerting on it is meaningful.
+This demo uses `cosine` with a threshold of `0.6`. Cosine distance runs from 0 (identical meaning) to 1 (completely unrelated), so anything above 0.6 gets dropped. This means `chunk_count` can now be anywhere from 0 to `n_results` depending on how well the complaint matches the policy, so the metric actually varies and alerting on it is meaningful.
 
 The threshold is also recorded on the retrieval span (`retrieval.threshold`), so you can see it alongside the chunk count in Dynatrace and adjust it if results feel too broad or too narrow.
 

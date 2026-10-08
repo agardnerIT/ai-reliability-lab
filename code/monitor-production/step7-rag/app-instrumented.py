@@ -53,9 +53,9 @@ MODEL = "openai.gpt-oss-120b"
 
 # Cosine distance threshold for retrieval. Chunks with a distance above this
 # value are dropped. Cosine distance runs from 0 (identical meaning) to 1
-# (completely unrelated), so 0.5 keeps only chunks that are at least loosely
+# (completely unrelated), so 0.6 keeps only chunks that are at least loosely
 # relevant to the query.
-RETRIEVAL_THRESHOLD = 0.5
+RETRIEVAL_THRESHOLD = 0.6
 
 SYSTEM_PROMPT = """\
 You are a senior customer support agent. Write a detailed, personalised response to the customer's complaint.
