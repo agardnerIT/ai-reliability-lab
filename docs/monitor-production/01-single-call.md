@@ -44,9 +44,6 @@ Make sure your AWS credentials are configured. See [Environment Setup](../founda
 
 ```bash
 cd code/monitor-production/step1and2-basic-app
-
-export AWS_REGION=us-east-2
-
 python app.py
 ```
 
