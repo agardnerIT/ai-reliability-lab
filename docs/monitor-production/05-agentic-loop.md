@@ -47,9 +47,7 @@ The model looks at the complaint, looks at the available tools, and chooses what
 ## Running it
 
 ```bash
-cd code/monitor-production/step5-agentic-loop
-
-export AWS_REGION=us-east-2
+cd /workspace/code/monitor-production/step5-agentic-loop
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 
 python app-instrumented.py        # run all complaints
@@ -172,6 +170,18 @@ while True:
 ```
 
 **`messages` is the orchestrator's only memory.** Every turn appends to it: the orchestrator's requests and every tool result. When the orchestrator is called again next turn, it can see the full history of what has happened so far.
+
+!!! example "Exercise: swap the orchestrator's routing for a decision model"
+    The orchestrator's job is to pick one option from a fixed list of tools. That is the same shape of problem a **decision model** is built for: it chooses between predefined options and returns a confidence score, rather than generating free text. [Strands Decider 2B](https://strandsagents.com/blog/introducing-strands-decider/) lists tool selection and routing as core use cases.
+
+    In [Step 4](04-agentic-pipeline.md) the exercise swaps a single agent. Here you would swap the router itself. A small decision model could make the "what next?" choice each turn, instead of a 120B-parameter LLM resending the full `messages` history every time.
+
+    As in Step 4, the model is a bit too heavy for the local Codespace, so we leave this as an exercise. If you have the resources, try it:
+
+    1. Run a decision model locally, or on hardware that can handle it.
+    2. Replace the orchestrator `chat` call with the decision model, using the four tool names as its options.
+    3. Keep the final response coming from `draft_response` (a decision model selects, it doesn't write).
+    4. Compare `triage.turns`, per-turn latency and orchestrator token usage in Dynatrace against the LLM orchestrator.
 
 ## The trace structure
 
@@ -325,15 +335,16 @@ This shows you the exact sequence of tool calls the model requested. All spans s
 dtctl query 'fetch spans
 | filter service.name == "support-triage-loop"
 | filter gen_ai.operation.name == "chat"
+| fieldsAdd agent = coalesce(gen_ai.agent.name, "orchestrator")
 | summarize
     calls = count(),
     avg_input_tokens = round(avg(gen_ai.usage.input_tokens), decimals:0),
     avg_output_tokens = round(avg(gen_ai.usage.output_tokens), decimals:0),
-    by: {gen_ai.agent.name}
+    by: {agent}
 | sort avg_input_tokens desc'
 ```
 
-The orchestrator's `gen_ai.agent.name` will be null (it is not a sub-agent). Sub-agents appear by name. Orchestrator input tokens grow each turn because the full conversation history is sent every iteration — this is where loop costs can creep up.
+The orchestrator's `gen_ai.agent.name` is null (it is not a sub-agent), so the query labels it `orchestrator`. Sub-agents appear by name. Orchestrator input tokens grow each turn because the full conversation history is sent every iteration — this is where loop costs can creep up.
 
 ### Check the escalation rate
 
