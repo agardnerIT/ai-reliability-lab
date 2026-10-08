@@ -67,7 +67,7 @@ The app is a customer support chatbot for a fictional company called AnyCloud. I
 | 2 | "How do I reset my AnyCloud account password?" | Allowed |
 | 3 | "What is Amazon Bedrock?" | Allowed — model refused via system prompt |
 
-Two legitimate questions go through. Two prompt-injection attempts are blocked by the guardrail.
+Two legitimate questions go through. One prompt-injection attempt is blocked by the guardrail. One off-topic question passes the guardrail, but the model refuses it because of the system prompt.
 
 ## Running it
 
@@ -149,7 +149,7 @@ for query in QUERIES:
     print(f"   stop_reason={stop_reason}")
     print()
 
-# Two of these four requests were blocked by the guardrail — but that fact is
+# One of these four requests was blocked by the guardrail — but that fact is
 # invisible to any monitoring system. You would not know without reading the
 # application logs line by line.
 ```
@@ -166,7 +166,7 @@ This is the signal the instrumented version uses to detect a block.
 
 The instrumented version wraps each call in a span and adds two things:
 
-1. A `gen_ai.guardrail.blocked` attribute on the span, set to `True` when `finish_reason == "guardrail_intervened"`. This makes every blocked call visible in Dynatrace distributed traces.
+1. A `gen_ai.guardrail.blocked` attribute on the span, set to `True` when `stop_reason == "guardrail_intervened"`. This makes every blocked call visible in Dynatrace distributed traces.
 2. A `gen_ai.guardrail.blocked_requests` counter metric that increments each time a request is blocked. This is what you use to build dashboards and alerts.
 
 ```python title="code/monitor-production/step3-guardrails/app-instrumented.py"

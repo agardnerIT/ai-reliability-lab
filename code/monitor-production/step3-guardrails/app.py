@@ -82,6 +82,6 @@ for query in queries:
     print(f"   stop_reason={stop_reason}")
     print()
 
-# Two of these four requests were blocked by the guardrail — but that fact is
+# One of these four requests was blocked by the guardrail — but that fact is
 # invisible to any monitoring system. You would not know without reading the
 # application logs line by line.
