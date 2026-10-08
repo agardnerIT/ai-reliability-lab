@@ -72,11 +72,8 @@ Two legitimate questions go through. One prompt-injection attempt is blocked by 
 ## Running it
 
 ```bash
-cd code/monitor-production/step3-guardrails
-
-export AWS_REGION=us-east-2
+cd /workspace/code/monitor-production/step3-guardrails
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
-export GUARDRAIL_ID=abc123def456   # replace with your guardrail ID from the AWS Console
 
 python app-instrumented.py      # run all four queries
 python app-instrumented.py 0   # index 0: allowed
@@ -355,6 +352,72 @@ The counter goes up by one every time a request is blocked. Over time, you can c
 **In metrics:** Chart `gen_ai.guardrail.blocked_requests` over time. A flat line close to zero is what you want. A sudden spike means something changed: either users discovered an injection pattern and are trying it repeatedly, or a recent guardrail configuration change started blocking requests it should not.
 
 **Setting an alert:** In Dynatrace, create a metric alert on `gen_ai.guardrail.blocked_requests`. Set the threshold relative to your normal traffic volume. If the block rate rises above a certain percentage of total requests, alert your team. A spike is either a security incident or a misconfigured guardrail. Either way, you want to know about it.
+
+## Query it with dtctl
+
+After running `python app-instrumented.py`, confirm the guardrail telemetry arrived.
+
+### Find the blocked requests
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "anycloud-support-bot"
+| filter gen_ai.guardrail.blocked == true
+| fields start_time, span.name, gen_ai.guardrail.id, gen_ai.response.finish_reasons
+| sort start_time desc
+| limit 10'
+```
+
+You should see one row per blocked call (the tic-tac-toe injection) with `finish_reasons` of `guardrail_intervened`.
+
+### Read what the user sent
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "anycloud-support-bot"
+| filter gen_ai.guardrail.blocked == true
+| expand span.events
+| filter span.events[span_event.name] == "gen_ai.user.message"
+| fields start_time, gen_ai.guardrail.id, prompt = span.events[gen_ai.event.content]
+| sort start_time desc
+| limit 10'
+```
+
+The `prompt` column holds the blocked user message. Use this to decide whether the guardrail caught a real attack or over-blocked a legitimate question.
+
+### Compare blocked and allowed requests
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "anycloud-support-bot"
+| summarize requests = count(), by: {gen_ai.guardrail.blocked}'
+```
+
+With the four demo queries you should see three `false` and one `true` for each run.
+
+### Check the block rate
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "anycloud-support-bot"
+| summarize total = count(), blocked = countIf(gen_ai.guardrail.blocked == true)
+| fieldsAdd block_rate_pct = 100.0 * blocked / total'
+```
+
+With the four demo queries the block rate is 25%. In production, this is the number to alert on.
+
+### Check the counter metric
+
+```bash
+dtctl query 'timeseries blocked = sum(gen_ai.guardrail.blocked_requests), by: {gen_ai.guardrail.id, gen_ai.request.model}
+| fieldsAdd total = arraySum(blocked)
+| fields gen_ai.guardrail.id, gen_ai.request.model, total'
+```
+
+You should see one row with the total number of blocked requests. If you have not yet triggered a block, the metric does not exist and the query returns no rows.
+
+???+ info "Event attribute names"
+    The user-message query reads the span event that the instrumented app adds with `span.add_event("gen_ai.user.message", ...)`. If your tenant returns no `prompt` values, run `fetch spans | filter gen_ai.guardrail.blocked == true | limit 1` and inspect the `span.events` field to see how events are shaped in your environment.
 
 ## Two things guardrail observability tells you
 

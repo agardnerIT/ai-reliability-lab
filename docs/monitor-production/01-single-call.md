@@ -43,7 +43,7 @@ Make sure your AWS credentials are configured. See [Environment Setup](../founda
 ## Running it
 
 ```bash
-cd code/monitor-production/step1and2-basic-app
+cd /workspace/code/monitor-production/step1and2-basic-app
 python app.py
 ```
 

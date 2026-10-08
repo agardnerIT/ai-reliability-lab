@@ -60,7 +60,7 @@ To point it at your Dynatrace tenant, follow the [Adding your Dynatrace token](.
 ## Running it
 
 ```bash
-cd code/monitor-production/step1and2-basic-app
+cd /workspace/code/monitor-production/step1and2-basic-app
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 python app-instrumented.py
 ```
@@ -256,8 +256,8 @@ After running, wait about **60 seconds** for data to arrive, then query from the
 ```bash
 dtctl query 'fetch spans
 | filter service.name == "bedrock-chat-client"
-| fields timestamp, span.name, duration, gen_ai.request.model, gen_ai.usage.input_tokens, gen_ai.usage.output_tokens
-| sort timestamp desc
+| fields start_time, span.name, duration, gen_ai.request.model, gen_ai.usage.input_tokens, gen_ai.usage.output_tokens
+| sort start_time desc
 | limit 5'
 ```
 
