@@ -61,10 +61,7 @@ To point it at your Dynatrace tenant, follow the [Adding your Dynatrace token](.
 
 ```bash
 cd code/monitor-production/step1and2-basic-app
-
-export AWS_REGION=us-east-2
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
-
 python app-instrumented.py
 ```
 
