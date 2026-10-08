@@ -2,23 +2,23 @@
 
 <div class="dt-trail">
   <div class="dt-trail-item">
-    <a href="01-single-call.md" class="dt-trail-step inactive">Step 1: First Call</a>
+    <a href="../01-single-call/" class="dt-trail-step inactive">Step 1: First Call</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="02-add-observability.md" class="dt-trail-step inactive">Step 2: Add OTel</a>
+    <a href="../02-add-observability/" class="dt-trail-step inactive">Step 2: Add OTel</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="03-guardrails.md" class="dt-trail-step inactive">Step 3: Guardrails</a>
+    <a href="../03-guardrails/" class="dt-trail-step inactive">Step 3: Guardrails</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="04-agentic-pipeline.md" class="dt-trail-step inactive">Step 4: Pipeline</a>
+    <a href="../04-agentic-pipeline/" class="dt-trail-step inactive">Step 4: Pipeline</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="05-agentic-loop.md" class="dt-trail-step inactive">Step 5: Loop</a>
+    <a href="../05-agentic-loop/" class="dt-trail-step inactive">Step 5: Loop</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
@@ -26,11 +26,11 @@
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="07-rag.md" class="dt-trail-step inactive">Step 7: RAG</a>
+    <a href="../07-rag/" class="dt-trail-step inactive">Step 7: RAG</a>
     <span class="dt-trail-arrow">→</span>
   </div>
   <div class="dt-trail-item">
-    <a href="08-model-selection.md" class="dt-trail-step inactive">Step 8: Model Migration</a>
+    <a href="../08-model-selection/" class="dt-trail-step inactive">Step 8: Model Migration</a>
   </div>
 </div>
 
