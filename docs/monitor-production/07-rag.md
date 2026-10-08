@@ -168,6 +168,31 @@ This demo uses `cosine` with a threshold of `0.5`. Cosine distance runs from 0 (
 
 The threshold is also recorded on the retrieval span (`retrieval.threshold`), so you can see it alongside the chunk count in Dynatrace and adjust it if results feel too broad or too narrow.
 
+To tune it with data instead of guesses, the span also records the raw cosine distances from before the filter runs:
+
+```python
+span.set_attribute("retrieval.min_distance", min(distances) if distances else 1.0)
+span.set_attribute("retrieval.distances",    json.dumps([round(d, 3) for d in distances]))
+```
+
+`retrieval.min_distance` is how far the closest policy section was from the complaint. Smaller means a better match. If it is bigger than `retrieval.threshold`, nothing was good enough and the model saw no policy text.
+
+Raising the threshold lets looser matches through. Lowering it is stricter.
+
+Query it from the terminal (after running the app and waiting about 60 seconds):
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-rag"
+| filter gen_ai.operation.name == "retrieval"
+| fieldsAdd missed_by = retrieval.min_distance - retrieval.threshold
+| fields start_time, retrieval.query, retrieval.min_distance, retrieval.threshold, retrieval.chunk_count, missed_by
+| sort start_time desc
+| limit 10'
+```
+
+A positive `missed_by` means the complaint just missed the cut-off and the model saw no policy text. If it only misses by a little, raise `RETRIEVAL_THRESHOLD` in `app-instrumented.py` and re-run. If it misses by a lot, the policy probably has no section covering that complaint.
+
 Once you have score-based filtering, the patterns to watch for are:
 
 | Pattern | What it suggests |
@@ -210,6 +235,20 @@ Each trace has three spans. Open one and you'll see:
 - The root `triage` span with `complaint.id`, `complaint.customer`, and `retrieval.matched_sections`
 - A `retrieval` child span showing the query, how many chunks were requested, and which sections were returned. Duration here is the vector search latency.
 - A `chat` child span with the full GenAI attributes (model, token counts, input/output messages). Duration here is the LLM latency.
+
+### Check how many chunks were indexed and how long indexing took
+
+```bash
+dtctl query 'fetch spans
+| filter service.name == "support-rag"
+| filter span.name == "index policy"
+| fieldsAdd index_duration_s = round(toLong(duration) / 1000000000, decimals:2)
+| fields start_time, policy.file, policy.section_count, index_duration_s
+| sort start_time desc
+| limit 10'
+```
+
+`policy.section_count` is the number of chunks added to the vector store (one per `##` heading), and `index_duration_s` is the length of the `index policy` span. This should match the `Indexed N policy sections` line printed in the terminal. If the count is lower than the number of `##` headings in the policy file, the document was not split as expected.
 
 ### Check triage traces with matched policy sections
 

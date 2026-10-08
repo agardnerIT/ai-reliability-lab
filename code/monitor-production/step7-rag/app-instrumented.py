@@ -12,6 +12,8 @@ The retrieval span is the new element vs earlier examples. It carries:
   - retrieval.query                       the complaint text used as the search query
   - retrieval.n_results                   how many chunks were requested
   - retrieval.matched_sections            which policy sections were returned
+  - retrieval.min_distance                closest cosine distance, before threshold filtering
+  - retrieval.distances                   all returned distances, before threshold filtering
 
 This makes it possible to answer "what context did the model actually see?"
 directly from the trace, without re-running the query.
@@ -183,6 +185,11 @@ def _retrieve(collection: chromadb.Collection, query: str, n: int = 3) -> list[s
         chunks     = results["documents"][0]
         metas      = results["metadatas"][0]
         distances  = results["distances"][0]
+
+        # Record the raw distances before filtering so you can see how close a
+        # complaint was to passing the threshold, even when nothing matched.
+        span.set_attribute("retrieval.min_distance", min(distances) if distances else 1.0)
+        span.set_attribute("retrieval.distances",    json.dumps([round(d, 3) for d in distances]))
 
         # Drop chunks that are too dissimilar to the query.
         chunks = [c for c, d in zip(chunks, distances) if d <= RETRIEVAL_THRESHOLD]
