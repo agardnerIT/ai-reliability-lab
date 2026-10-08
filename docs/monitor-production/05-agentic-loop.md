@@ -44,6 +44,10 @@ In an agentic loop, your code says: "you are a routing agent, here are tools you
 
 The model looks at the complaint, looks at the available tools, and chooses what to call, in what order, and when to stop. Your code just dispatches whatever the model requests.
 
+Notice that not every tool invokes an agentic call. The `escalate` tool simply returns a 
+
+![agentic loop architecture](../assets/agentic-loop.architecture.drawio.png)
+
 ## Running it
 
 ```bash

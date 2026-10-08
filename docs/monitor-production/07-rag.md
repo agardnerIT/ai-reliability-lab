@@ -41,9 +41,7 @@ This adds a new operation to the trace: the retrieval step.
 ## Running it
 
 ```bash
-cd code/monitor-production/step7-rag
-
-export AWS_REGION=us-east-2
+cd /workspace/code/monitor-production/step7-rag
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 
 python app-instrumented.py        # run all complaints
@@ -71,6 +69,8 @@ triage {complaint_id}         ← root span, full lifecycle
 ```
 
 ## How the policy gets into the vector store
+
+![RAG architecture](../assets/rag-architecture.drawio.png)
 
 Before RAG can work, the policy document has to be loaded into a vector store. This is called indexing, and it happens once at startup, before any complaint is processed.
 

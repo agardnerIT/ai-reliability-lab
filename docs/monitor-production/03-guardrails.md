@@ -44,6 +44,8 @@ The guardrail catches this. The problem is that without instrumentation, your ap
 
 This step adds the observability that makes guardrail activity visible in Dynatrace.
 
+![guardrail architecture](../assets/guardrail.architecture.drawio.png)
+
 ## What you need first: a guardrail ID
 
 This step needs a guardrail already set up in your AWS account, plus its ID as the `GUARDRAIL_ID` environment variable. If you completed [Foundation → Setup](../foundation/setup.md), you already created the guardrail and ran it through the smoke test — you're ready to go.
