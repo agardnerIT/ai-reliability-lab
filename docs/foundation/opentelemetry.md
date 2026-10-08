@@ -116,6 +116,20 @@ Using standard names means Dynatrace (and other backends) can automatically reco
 !!! warning "Still in development"
     The GenAI semantic conventions are currently marked as **Development** status, which means the attribute names above may change as the spec matures. Check the [spec repo](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/README.md) for the latest, and don't be surprised if a future version renames something.
 
+## Manual vs automatic instrumentation
+
+In these tutorials we instrument everything **manually**: you create each span, set each attribute and record each metric yourself. This is deliberately "the hard way". Nothing is hidden, so you can see exactly where every `gen_ai.*` attribute comes from.
+
+In practice, you don't have to write all of this by hand. OpenTelemetry offers **automatic instrumentation** that hooks into common libraries and produces telemetry with little or no code changes:
+
+- **Python**: the [`opentelemetry-instrument`](https://opentelemetry.io/docs/zero-code/python/) launcher wraps your app and instruments supported libraries (HTTP clients, web frameworks, databases and more). Libraries for popular AI SDKs are also available in the [OpenTelemetry Python contrib repository](https://github.com/open-telemetry/opentelemetry-python-contrib).
+- **Any language**: the [OpenTelemetry Injector](https://github.com/open-telemetry/opentelemetry-injector) uses `LD_PRELOAD` to inject auto-instrumentation into processes without modifying the application or its launch command.
+
+A typical production application uses a **mix of both**: automatic instrumentation for the common plumbing (HTTP, databases, SDK calls), plus manual instrumentation for the business logic and AI-specific context that only you know about, such as agent names, routing decisions and guardrail outcomes.
+
+!!! tip "Why learn the manual way first?"
+    Once you understand what a span, attribute and metric look like when you create them yourself, it's much easier to understand, verify and extend what auto-instrumentation produces.
+
 ## What you'll need
 
 You'll need two things: **Docker** and a **Dynatrace environment**. If you don't have one, you can [start a free trial](https://dt-url.net/trial). We provide everything else.

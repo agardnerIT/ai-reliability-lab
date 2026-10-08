@@ -268,7 +268,7 @@ dtctl query 'fetch spans
 ```bash
 dtctl query 'fetch spans
 | filter service.name == "support-rag"
-| filter gen_ai.operation.name in ("retrieval", "chat")
+| filter gen_ai.operation.name == "retrieval" or gen_ai.operation.name == "chat"
 | fieldsAdd dur_ns = toLong(duration)
 | summarize
     calls = count(),

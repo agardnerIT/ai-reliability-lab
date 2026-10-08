@@ -57,9 +57,7 @@ Each step exposes more traffic to the challenger only after the previous one loo
 ## Running it
 
 ```bash
-cd code/monitor-production/step8-model-selection
-
-export AWS_REGION=us-east-2
+cd /workspace/code/monitor-production/step8-model-selection
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 
 python app-instrumented.py        # run all 100 complaints
